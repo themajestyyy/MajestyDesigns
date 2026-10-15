@@ -1,0 +1,2079 @@
+/* ============================================================
+   MAJESTYDESIGNS — one page, eleven visual worlds.
+   Global spine: void #08080B · ivory #F2ECE1 · signal #E2431F
+   Every stage overrides the palette entirely; the spine is the
+   thread (signal red + mono captions) that survives each switch.
+   ============================================================ */
+
+*,
+*::before,
+*::after{box-sizing:border-box}
+
+:root{
+  --void:#08080b;
+  --ivory:#f2ece1;
+  --signal:#e2431f;
+  --f-grot:'Space Grotesk',ui-sans-serif,system-ui,-apple-system,sans-serif;
+  --f-mono:'Space Mono',ui-monospace,'SFMono-Regular',Menlo,monospace;
+  --f-serif:'Instrument Serif',Georgia,'Times New Roman',serif;
+  --f-black:'Archivo Black','Space Grotesk',Impact,sans-serif;
+  --f-deco:'Bodoni Moda','Instrument Serif',Georgia,serif;
+  --out:cubic-bezier(.16,1,.3,1);
+  --noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+html{background:#08080b}
+body{
+  margin:0;
+  background:var(--void);
+  color:var(--ivory);
+  font-family:var(--f-grot);
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+img,
+svg{max-width:100%;display:block}
+
+/* ---------- scroll engine ---------- */
+#scene{position:relative;z-index:1}
+.stage{position:relative}
+.pin{
+  position:sticky;top:0;
+  height:100vh;height:100svh;
+  overflow:hidden;
+  perspective:1150px;
+  perspective-origin:50% 48%;
+  isolation:isolate;
+  background:var(--pin-bg,#08080b);
+  color:var(--pin-fg,#f2ece1);
+}
+.depth{
+  position:absolute;inset:0;z-index:2;
+  transform-style:preserve-3d;
+  will-change:transform,opacity,filter;
+  backface-visibility:hidden;
+}
+.frame{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  padding:clamp(22px,4.4vw,74px);
+  padding-block:clamp(52px,7.2vh,88px);
+}
+.wrap{width:min(1320px,100%);position:relative}
+.fx{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+
+/* shared micro-typography (the spine) */
+.tag{
+  font-family:var(--f-mono);
+  font-size:clamp(9px,.72vw,11px);
+  letter-spacing:.26em;
+  text-transform:uppercase;
+}
+.chap{
+  display:flex;align-items:baseline;gap:14px;
+  font-family:var(--f-mono);
+  font-size:clamp(9px,.72vw,11px);
+  letter-spacing:.26em;text-transform:uppercase;
+}
+.chap b{font-weight:700}
+.rule{flex:1;height:1px;background:currentColor;opacity:.28}
+
+/* ---------- fixed chrome ---------- */
+#grain{
+  position:fixed;inset:-50%;z-index:60;pointer-events:none;
+  opacity:.055;mix-blend-mode:overlay;
+  background-image:var(--noise);
+  background-size:180px 180px;
+  animation:grainShift 1.1s steps(4,end) infinite;
+}
+@keyframes grainShift{
+0%{transform:translate3d(0,0,0)}
+25%{transform:translate3d(-3%,2%,0)}
+50%{transform:translate3d(2%,-3%,0)}
+75%{transform:translate3d(-2%,-1%,0)}
+100%{transform:translate3d(0,0,0)}
+}
+#vignette{
+  position:fixed;inset:0;z-index:55;pointer-events:none;
+  box-shadow:inset 0 0 clamp(90px,14vw,220px) rgba(0,0,0,.30);
+  opacity:var(--vig,1);transition:opacity .5s linear;
+}
+
+#hud{
+  position:fixed;z-index:70;pointer-events:none;
+  left:0;right:0;bottom:0;
+  padding:0 clamp(16px,3.2vw,40px) clamp(14px,2.4vh,26px);
+  display:flex;align-items:flex-end;justify-content:space-between;gap:16px;
+  font-family:var(--f-mono);
+  font-size:10px;letter-spacing:.24em;text-transform:uppercase;
+  color:var(--hud,#f2ece1);
+  mix-blend-mode:var(--hudblend,difference);
+  transition:color .45s linear;
+}
+#hud .now{display:flex;align-items:center;gap:10px;max-width:62vw}
+@keyframes pulse{
+0%,
+100%{opacity:1;transform:scale(1)}
+50%{opacity:.35;transform:scale(.7)}
+}
+#hud .style{opacity:.62}
+#rail{
+  position:fixed;z-index:70;pointer-events:none;
+  right:clamp(12px,2.2vw,26px);top:50%;transform:translateY(-50%);
+  width:1px;height:clamp(120px,22vh,210px);
+  background:currentColor;color:var(--hud,#f2ece1);opacity:.22;
+  mix-blend-mode:var(--hudblend,difference);
+}
+#railfill{
+  position:absolute;left:-1px;top:0;width:3px;height:0%;
+  background:currentColor;
+}
+
+@media (max-width:720px){
+#rail{display:none}
+#hud .style{display:none}
+}
+
+/* ============================================================
+   00 · HERO — kinetic depth. void ground, ivory mass, signal red.
+   ============================================================ */
+#s-hero .pin{--pin-bg:#08080b;--pin-fg:#f2ece1}
+.hero-glow{
+  position:absolute;left:50%;top:46%;width:min(96vw,1100px);aspect-ratio:1;
+  transform:translate(-50%,-50%);
+  background:radial-gradient(circle at 50% 50%,rgba(226,67,31,.24),rgba(226,67,31,.06) 38%,transparent 68%);
+  filter:blur(10px);
+}
+.hero-grid{
+  position:absolute;inset:-10%;
+  background-image:linear-gradient(rgba(242,236,225,.055) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(242,236,225,.055) 1px,transparent 1px);
+  background-size:92px 92px;
+  mask-image:radial-gradient(ellipse 62% 58% at 50% 48%,#000 12%,transparent 74%);
+  -webkit-mask-image:radial-gradient(ellipse 62% 58% at 50% 48%,#000 12%,transparent 74%);
+}
+.tunnel{position:absolute;inset:0;z-index:1;transform-style:preserve-3d;pointer-events:none}
+.tcard{
+  position:absolute;left:50%;top:50%;margin:0;
+  width:clamp(120px,15vw,224px);
+  aspect-ratio:3/4;
+  transform-style:preserve-3d;
+  will-change:transform,opacity;
+  box-shadow:0 40px 80px -30px rgba(0,0,0,.9);
+  outline:1px solid rgba(242,236,225,.14);
+  outline-offset:-1px;
+  overflow:hidden;
+}
+.tcard.wide{aspect-ratio:4/3;width:clamp(150px,19vw,280px)}
+
+.hero-wrap{display:flex;flex-direction:column;justify-content:space-between;height:100%}
+.hero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:20px}
+.hero-top .tag{opacity:.72}
+.hero-mark{margin:auto 0;mix-blend-mode:normal}
+.wm{
+  font-family:var(--f-black);
+  font-size:clamp(2.7rem,min(13.4vw,19vh),10.5rem);
+  line-height:.78;
+  letter-spacing:-.045em;
+  margin:0;
+  text-transform:uppercase;
+}
+.wm .l1{display:block;position:relative;color:#f2ece1}
+.wm .l1::after{
+  content:'MAJESTY';position:absolute;left:0;top:0;
+  color:#e2431f;mix-blend-mode:screen;
+  transform:translate3d(var(--ab,0px),0,0);
+  opacity:.9;
+}
+.wm .l2{
+  display:block;color:transparent;
+  -webkit-text-stroke:clamp(1px,.14vw,2px) rgba(242,236,225,.72);
+  padding-left:.055em;
+}
+.hero-sub{
+  display:flex;flex-wrap:wrap;gap:clamp(14px,3vw,42px);
+  margin-top:clamp(16px,2.6vh,30px);
+  align-items:baseline;
+}
+.hero-sub .lead{
+  font-family:var(--f-serif);
+  font-size:clamp(1.05rem,2.1vw,1.7rem);
+  line-height:1.28;max-width:31ch;margin:0;color:#e7e0d3;
+}
+.hero-bot{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;flex-wrap:wrap}
+.hero-bot .col{display:grid;gap:5px;opacity:.78}
+.hero-bot .col span:first-child{opacity:.5}
+.scrollcue{display:flex;align-items:center;gap:9px}
+.scrollcue .bar{width:52px;height:1px;background:currentColor;position:relative;overflow:hidden;opacity:.35}
+.scrollcue .bar::after{content:'';position:absolute;inset:0;background:#e2431f;animation:sweep 2.1s var(--out) infinite}
+@keyframes sweep{
+0%{transform:translateX(-100%)}
+60%,
+100%{transform:translateX(100%)}
+}
+
+/* ============================================================
+   01 · STATEMENT — Swiss. paper #E9E7E2, ink, one blue accent.
+   ============================================================ */
+#s-swiss .pin{--pin-bg:#e9e7e2;--pin-fg:#141414}
+.swiss-fx{
+  background-image:linear-gradient(90deg,rgba(20,20,20,.075) 1px,transparent 1px);
+  background-size:calc(100%/12) 100%;
+  margin-inline:clamp(22px,4.4vw,74px);
+  opacity:.9;
+}
+.swiss{
+  display:grid;
+  grid-template-columns:minmax(0,1.05fr) minmax(0,1.25fr) minmax(0,.62fr);
+  gap:clamp(14px,2.4vw,40px);
+  align-items:start;
+}
+.swiss .chap{grid-column:1/-1;color:#141414;margin-bottom:clamp(10px,2.2vh,24px)}
+.swiss h2{
+  grid-column:1/3;
+  font-family:var(--f-grot);
+  font-weight:300;
+  font-size:clamp(1.7rem,min(4.6vw,6.4vh),3.7rem);
+  line-height:1.02;letter-spacing:-.035em;
+  margin:0;text-wrap:balance;color:#141414;
+}
+.swiss h2 i{font-family:var(--f-serif);font-style:italic;font-weight:400;letter-spacing:-.01em}
+.swiss h2 u{text-decoration:none;color:#1b3ae0}
+.swiss .meta{grid-column:3/4;grid-row:2/4;display:grid;gap:clamp(14px,2.2vh,22px);align-content:start;padding-top:.55em}
+.swiss .meta div{display:grid;gap:4px;border-top:1px solid rgba(20,20,20,.28);padding-top:9px}
+.swiss .meta .k{font-family:var(--f-mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;opacity:.5}
+.swiss .meta .v{font-size:clamp(.82rem,1.1vw,.95rem);line-height:1.35}
+.swiss .body{grid-column:1/2;font-size:clamp(.8rem,.98vw,.94rem);line-height:1.56;max-width:34ch;color:#2b2b29;margin:0}
+.swiss .plate{grid-column:2/3;position:relative}
+.swiss .plate .portrait{display:block;height:clamp(190px,34vh,400px);width:auto;max-width:100%;aspect-ratio:3/4;object-fit:cover;object-position:50% 16%;background:#dedbd4;filter:contrast(1.03);margin-inline:auto}
+.swiss .plate figcaption{margin-top:9px;font-family:var(--f-mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;opacity:.48;display:flex;justify-content:space-between}
+.swiss .strip{grid-column:1/-1;display:flex;gap:clamp(10px,1.4vw,18px);margin-top:clamp(4px,1vh,14px)}
+.swiss .strip .ph{flex:1;height:clamp(64px,11vh,124px);overflow:hidden;background:#dedbd4}
+.swiss .dot{position:absolute;right:-14px;top:-14px;width:clamp(44px,5vw,72px);height:clamp(44px,5vw,72px);border-radius:50%;background:#1b3ae0;mix-blend-mode:multiply}
+
+/* ============================================================
+   02 · SELECTED WORK — shokado bento. Washi paper, asanoha
+   lattice, a black lacquer tray, and the tray's own construction
+   geometry drawn over it. Every compartment is cut to the true
+   ratio of the work it holds, so nothing is cropped to fit.
+   ============================================================ */
+#s-bento .pin{--pin-bg:#e9e2d3;--pin-fg:#211f1c}
+
+/* ---------- the paper the tray sits on ---------- */
+.bento-fx{
+  background:
+    radial-gradient(120% 80% at 50% -14%, rgba(255,251,240,.9), rgba(233,226,211,0) 64%),
+    radial-gradient(80% 60% at 88% 104%, rgba(148,120,74,.16), transparent 62%),
+    linear-gradient(180deg,#efe9dc,#e3dbc9);
+}
+/* asanoha — the hemp-leaf lattice, drawn once and tiled */
+.seigaiha{
+  position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Cpath d='M-30 -10A20 20 0 0 1 10 -10 Z' fill='%23efe9dc' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M-23.2 -10A13.2 13.2 0 0 1 3.2 -10' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M-16.4 -10A6.4 6.4 0 0 1 -3.6 -10' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M-10 -10A20 20 0 0 1 30 -10 Z' fill='%23efe9dc' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M-3.2 -10A13.2 13.2 0 0 1 23.2 -10' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M3.6 -10A6.4 6.4 0 0 1 16.4 -10' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M10 -10A20 20 0 0 1 50 -10 Z' fill='%23efe9dc' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M16.8 -10A13.2 13.2 0 0 1 43.2 -10' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M23.6 -10A6.4 6.4 0 0 1 36.4 -10' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M30 -10A20 20 0 0 1 70 -10 Z' fill='%23efe9dc' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M36.8 -10A13.2 13.2 0 0 1 63.2 -10' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M43.6 -10A6.4 6.4 0 0 1 56.4 -10' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M-40 0A20 20 0 0 1 0 0 Z' fill='%23efe9dc' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M-33.2 0A13.2 13.2 0 0 1 -6.8 0' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M-26.4 0A6.4 6.4 0 0 1 -13.6 0' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M-20 0A20 20 0 0 1 20 0 Z' fill='%23efe9dc' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M-13.2 0A13.2 13.2 0 0 1 13.2 0' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M-6.4 0A6.4 6.4 0 0 1 6.4 0' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M0 0A20 20 0 0 1 40 0 Z' fill='%23efe9dc' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M6.8 0A13.2 13.2 0 0 1 33.2 0' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M13.6 0A6.4 6.4 0 0 1 26.4 0' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M20 0A20 20 0 0 1 60 0 Z' fill='%23efe9dc' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M26.8 0A13.2 13.2 0 0 1 53.2 0' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M33.6 0A6.4 6.4 0 0 1 46.4 0' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M-30 10A20 20 0 0 1 10 10 Z' fill='%23efe9dc' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M-23.2 10A13.2 13.2 0 0 1 3.2 10' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M-16.4 10A6.4 6.4 0 0 1 -3.6 10' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M-10 10A20 20 0 0 1 30 10 Z' fill='%23efe9dc' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M-3.2 10A13.2 13.2 0 0 1 23.2 10' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M3.6 10A6.4 6.4 0 0 1 16.4 10' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M10 10A20 20 0 0 1 50 10 Z' fill='%23efe9dc' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M16.8 10A13.2 13.2 0 0 1 43.2 10' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M23.6 10A6.4 6.4 0 0 1 36.4 10' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M30 10A20 20 0 0 1 70 10 Z' fill='%23efe9dc' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M36.8 10A13.2 13.2 0 0 1 63.2 10' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M43.6 10A6.4 6.4 0 0 1 56.4 10' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M-40 20A20 20 0 0 1 0 20 Z' fill='%23efe9dc' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M-33.2 20A13.2 13.2 0 0 1 -6.8 20' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M-26.4 20A6.4 6.4 0 0 1 -13.6 20' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M-20 20A20 20 0 0 1 20 20 Z' fill='%23efe9dc' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M-13.2 20A13.2 13.2 0 0 1 13.2 20' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M-6.4 20A6.4 6.4 0 0 1 6.4 20' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M0 20A20 20 0 0 1 40 20 Z' fill='%23efe9dc' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M6.8 20A13.2 13.2 0 0 1 33.2 20' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M13.6 20A6.4 6.4 0 0 1 26.4 20' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M20 20A20 20 0 0 1 60 20 Z' fill='%23efe9dc' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M26.8 20A13.2 13.2 0 0 1 53.2 20' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M33.6 20A6.4 6.4 0 0 1 46.4 20' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M-30 30A20 20 0 0 1 10 30 Z' fill='%23efe9dc' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M-23.2 30A13.2 13.2 0 0 1 3.2 30' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M-16.4 30A6.4 6.4 0 0 1 -3.6 30' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M-10 30A20 20 0 0 1 30 30 Z' fill='%23efe9dc' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M-3.2 30A13.2 13.2 0 0 1 23.2 30' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M3.6 30A6.4 6.4 0 0 1 16.4 30' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M10 30A20 20 0 0 1 50 30 Z' fill='%23efe9dc' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M16.8 30A13.2 13.2 0 0 1 43.2 30' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M23.6 30A6.4 6.4 0 0 1 36.4 30' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M30 30A20 20 0 0 1 70 30 Z' fill='%23efe9dc' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M36.8 30A13.2 13.2 0 0 1 63.2 30' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M43.6 30A6.4 6.4 0 0 1 56.4 30' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M-40 40A20 20 0 0 1 0 40 Z' fill='%23efe9dc' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M-33.2 40A13.2 13.2 0 0 1 -6.8 40' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M-26.4 40A6.4 6.4 0 0 1 -13.6 40' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M-20 40A20 20 0 0 1 20 40 Z' fill='%23efe9dc' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M-13.2 40A13.2 13.2 0 0 1 13.2 40' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M-6.4 40A6.4 6.4 0 0 1 6.4 40' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M0 40A20 20 0 0 1 40 40 Z' fill='%23efe9dc' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M6.8 40A13.2 13.2 0 0 1 33.2 40' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M13.6 40A6.4 6.4 0 0 1 26.4 40' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M20 40A20 20 0 0 1 60 40 Z' fill='%23efe9dc' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M26.8 40A13.2 13.2 0 0 1 53.2 40' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3Cpath d='M33.6 40A6.4 6.4 0 0 1 46.4 40' fill='none' stroke='%23211f1c' stroke-width='.38'/%3E%3C/svg%3E");
+  background-size:clamp(104px,10.5vw,178px) clamp(104px,10.5vw,178px);
+  opacity:.17;
+  mix-blend-mode:multiply;
+  mask-image:radial-gradient(118% 96% at 50% 46%,transparent 26%,rgba(0,0,0,.55) 62%,#000 100%);
+  -webkit-mask-image:radial-gradient(118% 96% at 50% 46%,transparent 26%,rgba(0,0,0,.55) 62%,#000 100%);
+}
+/* 日の丸 — a single sun, low and warm, behind the tray */
+.hinomaru{
+  position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);
+  width:min(64vw,720px);aspect-ratio:1;border-radius:50%;
+  background:radial-gradient(circle at 50% 50%,rgba(194,80,47,.16),rgba(194,80,47,.05) 52%,transparent 70%);
+}
+.sumi{
+  position:absolute;inset:0;opacity:.5;mix-blend-mode:multiply;
+  background:
+    radial-gradient(46% 34% at 6% 8%, rgba(58,48,34,.20), transparent 70%),
+    radial-gradient(40% 30% at 96% 90%, rgba(58,48,34,.16), transparent 70%);
+}
+
+/* ---------- chapter head ---------- */
+.bento{display:flex;flex-direction:column;height:100%;gap:clamp(10px,1.8vh,20px)}
+.bhead{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex:none}
+.bhead .seal{
+  font-family:var(--f-mono);font-size:clamp(8.5px,.68vw,10px);letter-spacing:.24em;
+  text-transform:uppercase;color:#7d5a3c;display:flex;align-items:center;gap:9px;
+}
+.bhead .seal i{
+  width:clamp(15px,1.5vw,20px);aspect-ratio:1;flex:none;border-radius:2px;
+  background:#c2502f;display:grid;place-items:center;
+  font-style:normal;font-size:clamp(8px,.72vw,10px);color:#fdf3e4;letter-spacing:0;
+  box-shadow:0 1px 0 rgba(255,255,255,.6),0 3px 8px -4px rgba(120,50,26,.7);
+}
+
+/* ---------- the lacquer tray ---------- */
+.btray{
+  position:relative;flex:0 1 auto;min-height:0;
+  display:flex;align-items:center;justify-content:center;
+  padding:clamp(15px,1.8vw,30px);
+  border-radius:clamp(6px,.7vw,11px);
+  --bgap:clamp(7px,.85vw,13px);
+  background:
+    linear-gradient(158deg,#1d1912 0%,#100d0a 46%,#181410 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(198,160,74,.30),
+    inset 0 0 0 4px rgba(12,10,8,.9),
+    inset 0 0 0 5px rgba(198,160,74,.13),
+    inset 0 22px 46px -26px rgba(0,0,0,.95),
+    0 26px 50px -26px rgba(46,32,16,.55);
+}
+.btray::after{  /* raking light across the lacquer */
+  content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+  background:linear-gradient(122deg,rgba(255,236,196,.09) 0%,transparent 34%,transparent 70%,rgba(255,236,196,.05) 100%);
+}
+
+/* the composition: rows whose heights JS derives from the plate ratios */
+.bcompose{position:relative;display:flex;flex-direction:column;gap:var(--bgap,10px);margin:auto}
+.brow{display:flex;gap:var(--bgap,10px);min-height:0;flex:none}
+
+/* ---------- compartments ---------- */
+.bcell{
+  position:relative;overflow:hidden;margin:0;min-width:0;
+  flex:var(--ar,1) 1 0;height:100%;
+  background:#221d16;
+  border-radius:clamp(3px,.34vw,6px);
+  box-shadow:inset 0 0 0 1px rgba(198,160,74,.24),0 6px 14px -8px rgba(0,0,0,.85);
+}
+
+.bstack{display:flex;flex-direction:column;gap:var(--bgap,10px);background:none;box-shadow:none;border-radius:0;overflow:visible}
+.bstack > .bcell{width:100%;flex:none}
+.bcell .ph{position:absolute;inset:0}
+.bcell .pimg{object-fit:cover}
+
+/* the copy compartments — lacquer and vermilion, no image */
+.bcell.note,
+.bcell.chop{display:flex;flex-direction:column;justify-content:center;gap:clamp(5px,.9vh,10px);padding:clamp(11px,1.15vw,20px)}
+.bcell.note{background:linear-gradient(155deg,#241e15,#15110c)}
+.bcell.chop{background:linear-gradient(155deg,#c2502f,#a53d20);box-shadow:inset 0 0 0 1px rgba(255,224,190,.34),0 6px 14px -8px rgba(0,0,0,.85)}
+.bcell .k{font-family:var(--f-mono);font-size:clamp(8px,.66vw,9.6px);letter-spacing:.2em;text-transform:uppercase;color:#c6a04a}
+.bcell.chop .k{color:#ffe2ca;opacity:.85}
+.bcell .t{margin:0;font-family:var(--f-grot);font-weight:500;letter-spacing:-.02em;line-height:1.16;
+  font-size:clamp(.78rem,1.06vw,1.06rem);color:#f2ead9}
+.bcell.chop .t{color:#fff3e6}
+.bcell .s{margin:0;font-size:clamp(.64rem,.78vw,.76rem);line-height:1.45;color:rgba(242,234,217,.6)}
+
+/* compartment label — brass plaque, bottom edge */
+.blab{
+  position:absolute;left:0;right:0;bottom:0;z-index:2;
+  display:flex;justify-content:space-between;gap:8px;
+  padding:7px clamp(7px,.7vw,11px) 6px;
+  font-family:var(--f-mono);font-size:clamp(7.5px,.62vw,9px);letter-spacing:.15em;
+  text-transform:uppercase;color:#f0e4cd;
+  background:linear-gradient(to top,rgba(12,9,6,.88),rgba(12,9,6,.5) 55%,transparent);
+}
+.blab b{font-weight:400;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.blab span{color:#c6a04a;flex:none}
+
+/* ---------- the tray's own geometry, drawn from the real cells ---------- */
+.bgeo{
+  position:absolute;inset:0;width:100%;height:100%;
+  pointer-events:none;z-index:3;overflow:visible;
+}
+.bgeo .grid{stroke:#c6a04a;stroke-width:.8;stroke-dasharray:2.5 5.5;opacity:.5;fill:none}
+.bgeo .edge{stroke:#c6a04a;stroke-width:.8;stroke-dasharray:9 6;opacity:.6;fill:none}
+.bgeo .tick{stroke:#f0dfb2;stroke-width:1;opacity:.85}
+
+/* ============================================================
+   03 · CAPABILITIES — glass. indigo mesh, frosted plates.
+   ============================================================ */
+#s-glass .pin{--pin-bg:#0d0a24;--pin-fg:#eef0ff}
+.glassfield{
+  position:absolute;inset:-18%;
+  background:
+    radial-gradient(38% 36% at 14% 10%, rgba(104,48,255,1), rgba(104,48,255,.48) 42%, rgba(104,48,255,0) 78%),
+    radial-gradient(34% 32% at 90% 12%, rgba(255,48,158,.95), rgba(255,48,158,.4) 42%, rgba(255,48,158,0) 78%),
+    radial-gradient(44% 42% at 68% 88%, rgba(0,192,246,.8), rgba(0,192,246,.32) 44%, rgba(0,192,246,0) 80%),
+    radial-gradient(40% 38% at 14% 80%, rgba(146,20,220,.9), rgba(146,20,220,.34) 44%, rgba(146,20,220,0) 80%);
+  filter:blur(46px);
+  will-change:transform;
+}
+.glass-soft{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(118% 96% at 50% 52%, rgba(8,6,22,0) 40%, rgba(8,6,22,.40) 78%, rgba(6,4,18,.82) 100%),
+    linear-gradient(to bottom, rgba(8,6,22,.58), rgba(8,6,22,0) 40%, rgba(8,6,22,.18) 100%);
+}
+.glass-dither{
+  position:absolute;inset:0;opacity:.11;mix-blend-mode:overlay;
+  background-image:var(--noise);background-size:170px 170px;
+}
+.glass-note{max-width:34ch;line-height:1.9;letter-spacing:.13em;text-align:right;opacity:.6}
+.glass-wrap{display:grid;gap:clamp(16px,3vh,34px)}
+.glass-head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap}
+.glass-head h2{font-family:var(--f-serif);font-size:clamp(1.8rem,min(5vw,7vh),3.9rem);line-height:.94;letter-spacing:-.02em;margin:0}
+.glass-head h2 i{color:#9fb4ff}
+.gcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,208px),1fr));gap:clamp(10px,1.3vw,20px);transform-style:preserve-3d}
+.gcard{
+  position:relative;border-radius:22px;padding:clamp(14px,1.5vw,22px);
+  background:linear-gradient(155deg,rgba(24,18,58,.52),rgba(14,10,42,.4) 56%,rgba(34,24,78,.46));
+  backdrop-filter:blur(17px) saturate(135%);
+  -webkit-backdrop-filter:blur(17px) saturate(135%);
+  border:1px solid rgba(255,255,255,.24);
+  box-shadow:0 26px 60px -34px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.24);
+  display:flex;flex-direction:column;gap:10px;min-height:clamp(140px,20vh,205px);
+  will-change:transform,opacity;
+  transform:translateZ(0);backface-visibility:hidden;
+  isolation:isolate;
+}
+.gcard::after{
+  content:'';position:absolute;inset:0;border-radius:22px;pointer-events:none;
+  background:radial-gradient(140% 100% at 8% -10%, rgba(255,255,255,.26), rgba(255,255,255,.06) 42%, transparent 70%);
+}
+/* the light travelling over the pane — a background-position sweep, so the
+   frosted surface itself never has to be re-sampled mid-animation */
+.gcard .gsheen{
+  position:absolute;inset:0;border-radius:22px;pointer-events:none;z-index:1;
+  background:linear-gradient(102deg,
+    rgba(255,255,255,0) 34%, rgba(255,255,255,.07) 44%,
+    rgba(255,255,255,.30) 50%, rgba(255,255,255,.07) 56%,
+    rgba(255,255,255,0) 66%);
+  background-size:300% 100%;
+  background-position:var(--sheen,-60%) 0;
+  mix-blend-mode:screen;opacity:.9;
+}
+.gcard > :not(.gsheen){position:relative;z-index:2}
+.gcard .ph{will-change:transform}
+.gcard .k{font-family:var(--f-mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;opacity:.8;color:#b9c7ff}
+.gcard h3{margin:0;color:#f2f4ff;font-family:var(--f-grot);font-weight:500;font-size:clamp(1rem,1.5vw,1.32rem);letter-spacing:-.02em;line-height:1.1}
+.gcard p{margin:0;font-size:clamp(.72rem,.88vw,.84rem);line-height:1.5;opacity:.88;color:#e6ebff}
+.gcard .ph{margin-top:auto;height:clamp(44px,7vh,72px);border-radius:12px;overflow:hidden;opacity:.92}
+
+/* ============================================================
+   04 · PROCESS — CMYK press sheet. white stock, four inks.
+   ============================================================ */
+#s-cmyk .pin{--pin-bg:#ffffff;--pin-fg:#111111}
+.press-sheet{position:absolute;inset:clamp(14px,2.4vw,34px);border:1px dashed rgba(17,17,17,.24)}
+.regmark{position:absolute;width:26px;height:26px;opacity:.75}
+.regmark::before,
+.regmark::after{content:'';position:absolute;background:#111}
+.regmark::before{left:50%;top:0;width:1px;height:100%;transform:translateX(-.5px)}
+.regmark::after{top:50%;left:0;height:1px;width:100%;transform:translateY(-.5px)}
+.regmark i{position:absolute;inset:6px;border:1px solid #111;border-radius:50%}
+.rm-tl{left:-13px;top:-13px}
+.rm-tr{right:-13px;top:-13px}
+.rm-bl{left:-13px;bottom:-13px}
+.rm-br{right:-13px;bottom:-13px}
+.inkbar{position:absolute;left:0;bottom:-1px;display:flex;height:clamp(9px,1.1vh,13px);width:min(420px,54%)}
+.inkbar span{flex:1}
+.halftone{position:absolute;inset:0;opacity:.14;background-image:radial-gradient(#111 1.15px,transparent 1.2px);background-size:7px 7px;mask-image:linear-gradient(115deg,transparent 34%,#000 100%);-webkit-mask-image:linear-gradient(115deg,transparent 34%,#000 100%)}
+.cmyk{display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.25fr);gap:clamp(20px,3.6vw,60px);align-items:center}
+.cmyk .chap{grid-column:1/-1;color:#111}
+.cmyk h2{font-family:var(--f-black);font-size:clamp(1.6rem,min(4.2vw,6vh),3.2rem);line-height:.9;letter-spacing:-.045em;margin:0 0 clamp(14px,2.4vh,26px);text-transform:uppercase}
+.seps{position:relative;aspect-ratio:5/4;max-height:52vh;isolation:isolate}
+.seps .sep{position:absolute;inset:0;mix-blend-mode:multiply}
+.seps .sep:nth-child(1){transform:translate(-3.5px,-2px)}
+.seps .sep:nth-child(2){transform:translate(3px,1.5px)}
+.seps .sep:nth-child(3){transform:translate(-1px,3px)}
+.seps .sep:nth-child(4){transform:translate(1px,-1px)}
+.seps figcaption{position:absolute;left:0;bottom:-26px;font-family:var(--f-mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;opacity:.55}
+.steps{list-style:none;margin:0;padding:0;display:grid;gap:clamp(9px,1.5vh,16px)}
+.steps li{display:grid;grid-template-columns:auto auto 1fr;gap:clamp(10px,1.4vw,18px);align-items:baseline;border-top:1px solid rgba(17,17,17,.18);padding-top:clamp(8px,1.2vh,13px)}
+.steps .sw{width:11px;height:11px;border-radius:50%;transform:translateY(1px)}
+.steps .no{font-family:var(--f-mono);font-size:10px;letter-spacing:.18em;opacity:.5}
+.steps h3{margin:0;font-family:var(--f-grot);font-weight:500;font-size:clamp(.94rem,1.35vw,1.2rem);letter-spacing:-.02em}
+.steps p{margin:4px 0 0;font-size:clamp(.72rem,.9vw,.84rem);line-height:1.5;opacity:.66;max-width:44ch}
+.cmyk .sidefigs{display:flex;gap:10px;margin-top:clamp(12px,2vh,20px)}
+.cmyk .sidefigs .ph{flex:1;aspect-ratio:16/9;overflow:hidden;border:1px solid rgba(17,17,17,.16)}
+
+/* ============================================================
+   05 · ASABCORE — brutalist. paper white, 3px rules, red alarm.
+   ============================================================ */
+#s-brut .pin{--pin-bg:#f5f4f0;--pin-fg:#000000}
+.brut-fx{background-image:repeating-linear-gradient(0deg,rgba(0,0,0,.045) 0 1px,transparent 1px 4px)}
+.ticker{
+  position:absolute;left:0;right:0;overflow:hidden;z-index:4;
+  border-block:3px solid #000;background:#ff2d00;color:#000;
+  font-family:var(--f-black);text-transform:uppercase;
+  font-size:clamp(.7rem,1.5vw,1.15rem);letter-spacing:-.01em;
+  padding:5px 0;white-space:nowrap;
+}
+.ticker.top{top:0}
+.ticker.bot{bottom:0;background:#000;color:#f5f4f0}
+.ticker .run{display:inline-block;will-change:transform}
+.ticker .run span{padding:0 .5em}
+
+.bpanel{padding:clamp(13px,1.6vw,24px);display:grid;gap:clamp(9px,1.4vh,16px);align-content:start}
+.brut h2{
+  font-family:var(--f-black);text-transform:uppercase;margin:0;
+  font-size:clamp(1.9rem,min(7.4vw,10vh),5.4rem);line-height:.82;letter-spacing:-.055em;
+}
+.brut h2 span{display:block;color:#ff2d00}
+.brut .kicker{font-family:var(--f-mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;border-bottom:3px solid #000;padding-bottom:7px}
+.brut p{margin:0;font-family:var(--f-mono);font-size:clamp(.7rem,.92vw,.83rem);line-height:1.6;max-width:52ch}
+.btable{width:100%;color:inherit;border-collapse:collapse;font-family:var(--f-mono);font-size:clamp(.62rem,.82vw,.75rem)}
+.btable th,
+.btable td{border:2px solid #000;padding:6px 8px;text-align:left;text-transform:uppercase;letter-spacing:.06em}
+.btable th{background:#000;color:#f5f4f0}
+.btable td:last-child{text-align:right}
+
+.bnote{background:#000;color:#f5f4f0;padding:clamp(10px,1.3vw,18px);font-family:var(--f-mono);font-size:clamp(.62rem,.82vw,.74rem);line-height:1.55;letter-spacing:.04em}
+
+/* the plate wall: strips of true-ratio plates, flush to the bottom rule,
+   with an ink slab taking whatever width the plates do not need */
+.brun{
+  flex:0 0 auto;min-height:0;
+  display:flex;flex-direction:column;justify-content:flex-end;gap:3px;
+  background:#000;border-top:3px solid #000;overflow:hidden;
+}
+.bstrip{display:flex;gap:3px;flex:none;min-height:0;background:#000}
+.bplate{
+  margin:0;position:relative;flex:none;height:100%;min-width:0;
+  overflow:hidden;background:#e7e5df;
+}
+.bplate .ph{position:absolute;inset:0}
+.bplate .pimg{object-fit:cover;filter:grayscale(.12) contrast(1.06)}
+.binkfill{
+  flex:1 1 0;min-width:0;position:relative;overflow:hidden;
+  background:#000;display:flex;align-items:center;justify-content:center;
+  background-image:repeating-linear-gradient(135deg,
+    rgba(245,244,240,.07) 0 1px, transparent 1px 9px);
+}
+.binkfill span{
+  font-family:var(--f-mono);text-transform:uppercase;letter-spacing:.26em;
+  font-size:clamp(.56rem,.78vw,.72rem);color:rgba(245,244,240,.52);
+  white-space:nowrap;overflow:hidden;padding:0 .5em;
+}
+.binkfill span b{font-weight:400;color:#ff2d00}
+.binkfill.red{background:#ff2d00;background-image:repeating-linear-gradient(135deg,
+    rgba(0,0,0,.13) 0 1px, transparent 1px 9px)}
+.binkfill.red span{color:rgba(0,0,0,.72)}
+.bnote u{text-decoration:underline;text-underline-offset:3px;color:#ff2d00}
+
+/* ============================================================
+   06 · LSM — Y2K / cybercore. black chrome, cyan + magenta.
+   ============================================================ */
+#s-y2k .pin{--pin-bg:#04040c;--pin-fg:#dfe6ff}
+.floor{
+  position:absolute;left:-80%;right:-80%;bottom:0;height:78%;
+  overflow:hidden;
+  transform:perspective(900px) rotateX(56deg);
+  transform-origin:50% 100%;
+  -webkit-backface-visibility:hidden;backface-visibility:hidden;
+  mask-image:linear-gradient(to top,#000 2%,rgba(0,0,0,.5) 40%,transparent 88%);
+  -webkit-mask-image:linear-gradient(to top,#000 2%,rgba(0,0,0,.5) 40%,transparent 88%);
+}
+.floor-lines{
+  position:absolute;left:0;right:0;top:-52px;bottom:-52px;
+  background-image:linear-gradient(rgba(0,240,255,.85) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(255,47,208,.6) 1px,transparent 1px);
+  background-size:78px 52px;
+  will-change:transform;
+  transform:translate3d(0,0,0);
+  animation:floorRun 3.2s linear infinite;
+}
+@keyframes floorRun{
+to{transform:translate3d(0,52px,0)}
+}
+.sun{
+  position:absolute;left:50%;top:34%;transform:translate(-50%,-50%);
+  width:min(58vw,520px);aspect-ratio:1;border-radius:50%;
+  background:conic-gradient(from 180deg,#ff2fd0,#7a5cff,#00f0ff,#ff2fd0);
+  filter:blur(52px);opacity:.42;
+}
+.scan{position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.055) 0 1px,transparent 1px 3px);mix-blend-mode:screen}
+.y2k{display:grid;gap:clamp(14px,2.6vh,28px)}
+.y2k .chap{color:#7ef4ff}
+.chrome{
+  font-family:var(--f-black);text-transform:uppercase;margin:0;
+  font-size:clamp(3rem,min(15vw,21vh),11rem);line-height:.82;letter-spacing:-.05em;
+  background:linear-gradient(178deg,#ffffff 4%,#b9c6e8 22%,#5c6b90 40%,#0b0f1f 50%,#6f7fa6 58%,#e9f2ff 74%,#8ea3d6 90%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  text-shadow:
+    0 0 6px rgba(0,240,255,.30),
+    0 0 16px rgba(0,240,255,.26),
+    0 0 34px rgba(0,240,255,.20),
+    0 0 62px rgba(0,240,255,.14),
+    0 0 98px rgba(0,240,255,.08),
+    0 3px 0 rgba(255,47,208,.6);
+}
+.y2k-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:clamp(14px,2.4vw,34px);align-items:end}
+.win{
+  border:1px solid rgba(160,200,255,.42);
+  background:linear-gradient(180deg,rgba(16,22,48,.86),rgba(6,8,20,.86));
+  box-shadow:inset 1px 1px 0 rgba(255,255,255,.35),inset -1px -1px 0 rgba(0,0,0,.9),0 0 40px -12px rgba(0,240,255,.5);
+  border-radius:4px;overflow:hidden;
+}
+.win .bar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 8px;background:linear-gradient(90deg,#2a1b6e,#0e2d6b);font-family:var(--f-mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#cfe4ff;border-bottom:1px solid rgba(160,200,255,.3)}
+.win .bar em{display:flex;gap:4px;font-style:normal}
+.win .bar em i{width:11px;height:11px;background:linear-gradient(180deg,#dfe8ff,#8b9ccb);border:1px solid #0a1030;display:block}
+.win .body{padding:clamp(10px,1.3vw,18px);display:grid;gap:10px}
+.win p{margin:0;font-size:clamp(.72rem,.9vw,.84rem);line-height:1.55;color:#c8d6ff}
+.holo{
+  padding:clamp(10px,1.2vw,16px);border-radius:6px;
+  background:linear-gradient(112deg,#ff2fd0,#7a5cff 26%,#00f0ff 52%,#7dff9b 74%,#ffe600 100%);
+  background-size:250% 100%;animation:holo 7s linear infinite;
+  color:#05060e;font-family:var(--f-mono);font-weight:700;font-size:clamp(.66rem,.86vw,.78rem);
+  letter-spacing:.14em;text-transform:uppercase;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;
+}
+@keyframes holo{
+to{background-position:250% 0}
+}
+.y2kgal{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.y2kgal .ph{aspect-ratio:3/4;overflow:hidden;border:1px solid rgba(160,200,255,.4);border-radius:3px}
+.orb{position:absolute;right:6%;top:14%;width:clamp(90px,13vw,190px);aspect-ratio:1;transform-style:preserve-3d;animation:spin 14s linear infinite}
+.orb i{position:absolute;inset:0;border:1px solid rgba(0,240,255,.55);border-radius:50%}
+.orb i:nth-child(2){transform:rotateY(60deg);border-color:rgba(255,47,208,.55)}
+.orb i:nth-child(3){transform:rotateY(120deg)}
+.orb i:nth-child(4){transform:rotateX(70deg);border-color:rgba(255,255,255,.4)}
+@keyframes spin{
+to{transform:rotateY(360deg) rotateX(12deg)}
+}
+
+/* ============================================================
+   07 · PRESS — editorial duotone. warm ink, bone, ember.
+   Replaces the pop-art chapter: same job, quieter voice, and it
+   bridges the cold black of LSM into the paper of the archive.
+   ============================================================ */
+#s-press .pin{--pin-bg:#17140f;--pin-fg:#ede5d6}
+.press-fx{background:
+  radial-gradient(1300px 900px at 80% 10%,rgba(226,67,31,.16),transparent 60%),
+  radial-gradient(1000px 800px at 4% 92%,rgba(237,229,214,.07),transparent 58%);}
+.press-rule{position:absolute;left:clamp(22px,4.4vw,74px);right:clamp(22px,4.4vw,74px);top:0;bottom:0;
+  background-image:linear-gradient(90deg,rgba(237,229,214,.07) 1px,transparent 1px);
+  background-size:calc(100%/6) 100%}
+.press{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.92fr);gap:clamp(20px,3.6vw,64px);align-items:center}
+.press .chap{grid-column:1/-1;color:rgba(237,229,214,.72)}
+.pullquote{
+  font-family:var(--f-serif);
+  font-size:clamp(1.3rem,min(3.6vw,5.4vh),2.9rem);
+  line-height:1.08;letter-spacing:-.012em;margin:0;color:#ede5d6;text-wrap:balance;
+}
+.pullquote .q{color:#e2431f;margin-right:.04em}
+.pullquote em{font-style:italic;color:#e2431f}
+.attrib{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:clamp(12px,2.2vh,24px);align-items:baseline}
+.attrib .nm{font-family:var(--f-grot);font-weight:500;font-size:clamp(.82rem,1.05vw,.98rem);letter-spacing:-.01em}
+.attrib .rl{font-family:var(--f-mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(237,229,214,.5)}
+.plate2{display:grid;grid-template-columns:1fr 1fr;column-gap:clamp(8px,1.1vw,15px);row-gap:clamp(16px,3vh,34px)}
+.plate2 figure{margin:0}
+.plate2 .ph{aspect-ratio:4/5;max-height:26vh;overflow:hidden;border:1px solid rgba(237,229,214,.16)}
+.plate2 figure:nth-child(2),
+.plate2 figure:nth-child(3){transform:translateY(clamp(8px,1.5vh,18px))}
+.plate2 figcaption{margin-top:7px;font-family:var(--f-mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(237,229,214,.42);display:flex;justify-content:space-between}
+.marks{grid-column:1/-1;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border-top:1px solid rgba(237,229,214,.22);margin-top:clamp(6px,1.4vh,18px)}
+.marks span{
+  padding:clamp(9px,1.5vh,17px) 0 clamp(9px,1.5vh,17px) clamp(8px,1vw,14px);
+  border-right:1px solid rgba(237,229,214,.13);
+  border-bottom:1px solid rgba(237,229,214,.13);
+  font-family:var(--f-mono);font-size:clamp(.58rem,.78vw,.71rem);
+  letter-spacing:.2em;text-transform:uppercase;color:rgba(237,229,214,.66);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.marks span:nth-child(5n){border-right:0}
+.marks span em{font-style:normal;color:#e2431f}
+
+/* ============================================================
+   08 · ARCHIVE — risograph. newsprint stock, 2 inks, misreg.
+   ============================================================ */
+#s-riso .pin{--pin-bg:#f1ede1;--pin-fg:#1a1a18}
+.riso-fx{background-image:radial-gradient(rgba(26,26,24,.5) .6px,transparent .7px);background-size:3px 3px;opacity:.22;mix-blend-mode:multiply}
+.riso{display:grid;gap:clamp(12px,2.2vh,24px)}
+.riso-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.riso-head h2{position:relative;margin:0;font-family:var(--f-black);text-transform:uppercase;font-size:clamp(1.8rem,min(6vw,8.4vh),4.4rem);line-height:.84;letter-spacing:-.05em;color:#1a44ff;mix-blend-mode:multiply}
+.riso-head h2::before{content:attr(data-t);position:absolute;left:-4px;top:3px;color:#ff4f9a;mix-blend-mode:multiply;z-index:-1}
+.sheet{overflow:hidden;padding-block:clamp(6px,1vh,12px)}
+.riso-note{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:clamp(12px,2vw,28px);border-top:2px solid #1a1a18;padding-top:clamp(9px,1.4vh,15px)}
+.riso-note p{margin:0;font-family:var(--f-mono);font-size:clamp(.66rem,.84vw,.76rem);line-height:1.62}
+.riso-note b{display:block;color:#ff4f9a;letter-spacing:.16em;text-transform:uppercase;font-size:10px;margin-bottom:5px}
+
+/* ---------- 08b · cursor-driven plate trail ---------- */
+.trail{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+.tplate{
+  position:absolute;left:0;top:0;
+  width:clamp(132px,15.5vw,246px);aspect-ratio:4/5;
+  opacity:0;mix-blend-mode:multiply;
+  will-change:transform,opacity;
+  transform-origin:50% 50%;
+  box-shadow:0 18px 40px -28px rgba(26,26,24,.7);
+}
+.trailcue{display:flex;align-items:center;gap:clamp(10px,1.6vw,22px);opacity:.62}
+.trailcue .tag{white-space:nowrap;flex:none}
+.cursorline{flex:1;height:1px;background:#1a1a18;opacity:.3}
+@media (max-width:640px){
+.trailcue .tag{white-space:normal}
+}
+
+/* ============================================================
+   09 · STACK — neumorphism. quiet grey, soft extrusion.
+   ============================================================ */
+#s-neu .pin{--pin-bg:#e7eaef;--pin-fg:#464b57}
+.neu{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:clamp(18px,3vw,48px);align-items:center}
+.neu h2{margin:0;font-family:var(--f-grot);font-weight:300;font-size:clamp(1.6rem,min(4.2vw,6vh),3rem);line-height:1;letter-spacing:-.035em;color:#3b4049}
+.neu h2 b{font-weight:600}
+.neu .lede{margin:clamp(10px,1.6vh,18px) 0 0;font-size:clamp(.78rem,.98vw,.9rem);line-height:1.62;max-width:36ch;color:#6a7080}
+.soft{background:#e7eaef;border-radius:22px;box-shadow:9px 9px 20px #c6cad3,-9px -9px 20px #ffffff}
+.soft.in{box-shadow:inset 7px 7px 14px #c6cad3,inset -7px -7px 14px #ffffff}
+.dial{width:clamp(96px,13vw,152px);aspect-ratio:1;border-radius:50%;display:grid;place-items:center;margin-top:clamp(14px,2.4vh,26px)}
+.dial .core{width:62%;aspect-ratio:1;border-radius:50%;display:grid;place-items:center;font-family:var(--f-mono);font-size:clamp(.66rem,.9vw,.8rem);letter-spacing:.1em;color:#5b6170}
+.neugrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,168px),1fr));gap:clamp(11px,1.5vw,20px)}
+.ntile{border-radius:20px;padding:clamp(13px,1.5vw,20px);display:grid;gap:9px;align-content:start}
+.ntile .ic{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;font-family:var(--f-mono);font-size:11px;color:#5b6170}
+.ntile h3{margin:0;font-family:var(--f-grot);font-weight:600;font-size:clamp(.86rem,1.1vw,1rem);letter-spacing:-.015em;color:#3b4049}
+.ntile p{margin:0;font-size:clamp(.68rem,.84vw,.78rem);line-height:1.5;color:#767c8b}
+.ntile .bar{height:7px;border-radius:99px;margin-top:3px;position:relative;overflow:hidden}
+.ntile .bar i{position:absolute;left:0;top:0;bottom:0;border-radius:99px;background:linear-gradient(90deg,#8f9bb5,#b8c1d4)}
+
+/* ============================================================
+   10 · RECOGNITION — art deco. lacquer black, brass, symmetry.
+   ============================================================ */
+#s-deco .pin{--pin-bg:#0b0a0c;--pin-fg:#e9dcb4}
+.rays{position:absolute;left:50%;top:52%;width:190vmax;aspect-ratio:1;transform:translate(-50%,-50%);
+  background:conic-gradient(from 0deg,rgba(202,165,61,.16) 0 2deg,transparent 2deg 12deg);
+  mask-image:radial-gradient(circle at 50% 50%,#000 6%,transparent 58%);
+  -webkit-mask-image:radial-gradient(circle at 50% 50%,#000 6%,transparent 58%);}
+.deco{display:grid;gap:clamp(12px,2.2vh,26px);justify-items:center;text-align:center}
+.dband{width:100%;display:grid;grid-template-columns:1fr auto 1fr;gap:clamp(12px,2vw,26px);align-items:center}
+.dband .ln{height:1px;background:linear-gradient(90deg,transparent,#caa53d);position:relative;transform-origin:right center}
+.dband .ln::after{content:'';position:absolute;left:0;right:0;top:4px;height:1px;background:linear-gradient(90deg,transparent,rgba(202,165,61,.45))}
+.dband .ln.r{background:linear-gradient(270deg,transparent,#caa53d);transform-origin:left center}
+.dband .ln.r::after{background:linear-gradient(270deg,transparent,rgba(202,165,61,.45))}
+.dband .chev{width:clamp(24px,3vw,38px);height:clamp(24px,3vw,38px);border:1px solid #caa53d;transform:rotate(45deg);display:grid;place-items:center}
+.dband .chev i{width:44%;height:44%;background:#caa53d;transform:rotate(45deg)}
+.arch{
+  width:clamp(112px,14vw,178px);aspect-ratio:3/4;
+  border-radius:999px 999px 6px 6px;overflow:hidden;
+  border:2px solid #caa53d;
+  box-shadow:0 0 0 7px #0b0a0c,0 0 0 8px rgba(202,165,61,.42);
+}
+.deco h2{margin:0;font-family:var(--f-deco);font-weight:400;font-size:clamp(1.7rem,min(5vw,7vh),3.6rem);line-height:1;letter-spacing:.02em;color:#e9dcb4}
+.deco h2 em{display:block;font-style:italic;font-size:.42em;letter-spacing:.34em;text-transform:uppercase;color:#caa53d;margin-top:.6em}
+.awards{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,215px),1fr));gap:clamp(10px,1.6vw,24px);width:100%}
+.awards li{display:grid;gap:5px;padding-top:11px;border-top:1px solid rgba(202,165,61,.42);text-align:left}
+.awards .yr{font-family:var(--f-mono);font-size:10px;letter-spacing:.22em;color:#caa53d}
+.awards .ti{font-family:var(--f-deco);font-size:clamp(.9rem,1.25vw,1.1rem);letter-spacing:.01em}
+.awards .by{font-family:var(--f-mono);font-size:10px;letter-spacing:.1em;opacity:.5;text-transform:uppercase}
+.deco .sig{font-family:var(--f-deco);font-size:clamp(.95rem,1.7vw,1.4rem);letter-spacing:.3em;text-transform:uppercase;color:rgba(233,220,180,.8)}
+
+/* ============================================================
+   11 · CONTACT — 70s retro. cream stock, rust + mustard, arcs.
+   ============================================================ */
+#s-contact .pin{--pin-bg:#f2e3c7;--pin-fg:#3a2110}
+.retro-fx{background:radial-gradient(1200px 800px at 12% 6%,rgba(192,73,42,.14),transparent 58%)}
+.contact{display:grid;gap:clamp(10px,1.8vh,22px)}
+.contact .chap{color:#8a5a34}
+.groovy{
+  position:relative;
+  font-family:var(--f-black);text-transform:uppercase;margin:0;
+  font-size:clamp(1.9rem,min(7.4vw,9.6vh),4.7rem);line-height:1.04;letter-spacing:-.04em;
+  padding-top:.14em;
+  background:linear-gradient(168deg,#e0a233 0%,#c0492a 62%,#a8391f 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  text-shadow:2px 3px 0 rgba(58,33,16,.22);
+}
+.contact-row{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.85fr);gap:clamp(18px,3.4vw,56px);align-items:start}
+.crows{display:grid;border-top:2px solid #3a2110}
+.crow{
+  display:grid;grid-template-columns:minmax(88px,.18fr) minmax(0,1fr) auto;
+  gap:clamp(10px,2vw,26px);align-items:baseline;
+  padding:clamp(7px,1.25vh,13px) 0;border-bottom:2px solid #3a2110;
+}
+.crow .k{font-family:var(--f-mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#8a5a34}
+.crow .v{font-family:var(--f-grot);font-weight:500;font-size:clamp(.9rem,1.5vw,1.28rem);letter-spacing:-.02em;color:#3a2110;word-break:break-word}
+.crow .n{font-family:var(--f-mono);font-size:10px;letter-spacing:.2em;color:rgba(58,33,16,.6)}
+.badge{
+  display:inline-flex;align-items:center;gap:9px;
+  border-radius:999px;padding:9px 18px;background:#c0492a;color:#f6e7cd;
+  font-family:var(--f-mono);font-size:clamp(.6rem,.8vw,.72rem);letter-spacing:.2em;text-transform:uppercase;
+  box-shadow:3px 3px 0 #3a2110;
+}
+.badge i{width:7px;height:7px;border-radius:50%;background:#e0a233;animation:pulse 2.4s ease-in-out infinite}
+.arcstack{display:grid;gap:clamp(9px,1.6vh,16px);justify-items:end}
+.contact-foot{display:flex;align-items:flex-end;justify-content:space-between;gap:clamp(16px,3vw,40px);flex-wrap:wrap;border-top:2px solid #3a2110;padding-top:clamp(9px,1.5vh,16px)}
+.arcs{width:clamp(112px,15vw,186px);height:clamp(34px,5.4vh,56px);flex:none;display:flex;align-items:flex-end;justify-content:center;gap:clamp(5px,.8vw,9px)}
+.arcs i{flex:1;border-radius:999px 999px 0 0;background:#c0492a}
+.arcs i:nth-child(2){background:#e0a233}
+.arcs i:nth-child(3){background:#3a2110}
+.arcs i:nth-child(4){background:#c0492a}
+.arcs i:nth-child(5){background:#e0a233}
+.retro-note{font-family:var(--f-mono);font-size:clamp(.66rem,.84vw,.76rem);line-height:1.7;color:rgba(58,33,16,.66);max-width:32ch;text-align:right}
+.colophon{
+  display:grid;gap:6px;font-family:var(--f-mono);
+  font-size:clamp(.6rem,.78vw,.7rem);letter-spacing:.16em;text-transform:uppercase;
+  color:rgba(58,33,16,.55);text-align:right;justify-items:end;
+}
+.colophon .big{font-family:var(--f-black);font-size:clamp(.85rem,1.5vw,1.2rem);letter-spacing:.06em;color:#3a2110}
+
+/* ---------- the mark ---------- */
+.minimark{width:1.05em;height:1.05em;display:inline-block;vertical-align:-.18em;margin-right:.62em}
+.logo3d{
+  width:clamp(118px,15vw,196px);aspect-ratio:1;position:relative;
+  will-change:transform,opacity;transform-origin:50% 55%;
+}
+.logo3d .l3{width:100%;height:100%;display:block;overflow:visible;
+  filter:drop-shadow(0 20px 24px rgba(58,33,16,.32))}
+.l3-shadow{
+  position:absolute;left:6%;right:6%;bottom:-9%;height:14%;
+  background:radial-gradient(ellipse at 50% 50%,rgba(58,33,16,.34),transparent 68%);
+  filter:blur(5px);
+}
+.ext use{will-change:transform}
+
+/* ============================================================
+   text reveal — every chapter's type arrives, it doesn't appear
+   ============================================================ */
+.w{display:inline-block;overflow:hidden;vertical-align:bottom;padding-bottom:.16em;margin-bottom:-.16em}
+.wi{display:inline-block;will-change:transform,opacity}
+[data-anim="line"]{transform-origin:left center;will-change:transform}
+[data-anim="rise"]{will-change:transform,opacity}
+
+/* ---------- chapter cross-dissolve ---------- */
+.veil{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;will-change:opacity}
+.veil::before{content:'';position:absolute;left:0;right:0;top:0;height:clamp(70px,12vh,150px);
+  background:linear-gradient(to bottom,rgba(0,0,0,.34),transparent)}
+
+/* ---------- plates: procedural fallback + real work ---------- */
+.ph,
+.sep,
+.tcard{position:relative;overflow:hidden}
+.sep > svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.pimg{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:contain;object-position:50% 50%}
+.pimg.cover{object-fit:cover}
+.pimg.contain{object-fit:contain}
+.pimg.top{object-fit:cover;object-position:50% 12%}
+/* containers that take the shape of the work they hold */
+.tplate img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+@keyframes marq{
+from{transform:translateX(0)}
+to{transform:translateX(-50%)}
+}
+.ticker .run{animation:marq 30s linear infinite}
+.ticker.bot .run{animation-duration:42s;animation-direction:reverse}
+
+/* ---------- responsive ---------- */
+@media (max-width:1000px){
+.swiss{grid-template-columns:1fr 1fr}
+.swiss h2{grid-column:1/-1}
+.swiss .meta{grid-column:1/-1;grid-row:auto;grid-template-columns:repeat(2,1fr);padding-top:0}
+.swiss .body{grid-column:1/2}
+.swiss .plate{grid-column:2/3}
+.cmyk{grid-template-columns:1fr}
+.y2k-row{grid-template-columns:1fr}
+.neu{grid-template-columns:1fr}
+
+.press{grid-template-columns:1fr}
+.marks{grid-template-columns:repeat(3,minmax(0,1fr))}
+.marks span:nth-child(5n){border-right:1px solid rgba(237,229,214,.13)}
+.marks span:nth-child(3n){border-right:0}
+.contact-row{grid-template-columns:1fr}
+.arcstack{justify-items:start}
+.retro-note{text-align:left}
+}
+@media (max-width:640px){
+.frame{padding:18px;padding-block:clamp(58px,8vh,86px)}
+.swiss{grid-template-columns:1fr;gap:16px}
+.swiss .plate,
+.swiss .body,
+.swiss .meta{grid-column:1/-1}
+
+.swiss .meta{grid-template-columns:1fr 1fr}
+
+.y2kgal{grid-template-columns:repeat(2,1fr)}
+
+.plate2 .ph{max-height:20vh}
+.marks{grid-template-columns:repeat(2,minmax(0,1fr))}
+.marks span:nth-child(3n){border-right:1px solid rgba(237,229,214,.13)}
+.marks span:nth-child(2n){border-right:0}
+.neugrid{grid-template-columns:1fr 1fr}
+
+.crow{grid-template-columns:1fr;gap:2px}
+}
+
+@media (prefers-reduced-motion:reduce){
+.depth{transform:none !important;opacity:1 !important;filter:none !important}
+.veil{opacity:0 !important}
+.wi{transform:none !important;opacity:1 !important}
+[data-anim="line"]{transform:none !important}
+[data-anim="rise"]{transform:none !important;opacity:1 !important}
+#grain,
+.ticker .run,
+.holo,
+.floor,
+.orb,
+.scrollcue .bar::after,
+.badge i{animation:none !important}
+}
+
+/* ============================================================
+   11 · LOGO STUDY — draughting sheet. Construction lines,
+   dimension leaders, annotations. Reads as a drawing, not a
+   layout: the only chapter with no photographic ambition.
+   ============================================================ */
+#s-study .pin{--pin-bg:#edefe9;--pin-fg:#16191c}
+.study-fx{
+  background:
+    linear-gradient(rgba(38,92,140,.10) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(38,92,140,.10) 1px,transparent 1px),
+    linear-gradient(rgba(38,92,140,.045) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(38,92,140,.045) 1px,transparent 1px);
+  background-size:96px 96px,96px 96px,16px 16px,16px 16px;
+}
+.study-fx::after{
+  content:"";position:absolute;inset:clamp(14px,2.4vw,34px);
+  border:1px solid rgba(24,62,96,.34);
+}
+.study{display:grid;gap:clamp(10px,1.7vh,20px);grid-template-rows:auto auto 1fr auto}
+.study .chap{color:#1e5a8a}
+.study-head{display:flex;align-items:baseline;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.study-head h2{
+  font-family:var(--f-black);text-transform:uppercase;margin:0;
+  font-size:clamp(1.5rem,min(4.4vw,5.4vh),2.9rem);letter-spacing:-.035em;line-height:.95;color:#12161a;
+}
+.study-head .sheetno{font-family:var(--f-mono);font-size:10px;letter-spacing:.24em;color:#1e5a8a;text-transform:uppercase}
+.study-pair{display:grid;grid-template-columns:1fr 1fr;gap:clamp(14px,2.2vw,34px);min-height:0}
+.scase{display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:clamp(8px,1.2vh,14px);min-height:0}
+.scase-top{display:flex;align-items:baseline;gap:10px;border-bottom:1px solid rgba(24,62,96,.4);padding-bottom:6px}
+.scase-top b{font-family:var(--f-black);font-size:clamp(.86rem,1.5vw,1.14rem);letter-spacing:-.02em;text-transform:uppercase}
+.scase-top span{font-family:var(--f-mono);font-size:9.5px;letter-spacing:.2em;color:#4a5560;text-transform:uppercase;margin-left:auto}
+/* construction overlay: circles + centre cross, drawn over the mark */
+.snotes{display:grid;gap:5px;align-content:start}
+.snote{
+  display:grid;grid-template-columns:auto 1fr;gap:9px;align-items:start;
+  font-family:var(--f-grot);font-size:clamp(.66rem,.86vw,.78rem);line-height:1.5;color:#2a3138;
+}
+.snote em{
+  font-family:var(--f-mono);font-style:normal;font-size:9px;letter-spacing:.12em;
+  color:#fbfcfa;background:#1e5a8a;padding:2.5px 5px;border-radius:2px;line-height:1;margin-top:2px;
+}
+
+/* ============================================================
+   12 · ROSTER TYPE — kit sheet. Athletic condensed type, a red
+   seam, tag boxes. Black field, everything hard-edged.
+   ============================================================ */
+
+/* ============================================================
+   13 · MOTION — edit suite. Letterboxed frames, timecode,
+   a scrub rail. The only chapter that moves on its own.
+   ============================================================ */
+#s-motion .pin{--pin-bg:#131418;--pin-fg:#e8ecec}
+.motion-fx{background:radial-gradient(900px 620px at 50% 40%,rgba(96,255,196,.07),transparent 68%)}
+.motion-fx::after{
+  content:"";position:absolute;left:0;right:0;top:50%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(96,255,196,.18) 20%,rgba(96,255,196,.18) 80%,transparent);
+}
+.motion{display:grid;gap:clamp(10px,1.7vh,20px);grid-template-rows:auto auto 1fr auto;min-height:0}
+.motion .chap{color:#5fe8b4}
+.motion-head{display:flex;align-items:flex-end;justify-content:space-between;gap:clamp(14px,3vw,40px);flex-wrap:wrap}
+.motion-head h2{
+  margin:0;font-family:var(--f-serif);font-style:italic;font-weight:400;
+  font-size:clamp(1.7rem,min(5.6vw,7vh),3.5rem);line-height:1;letter-spacing:-.02em;color:#f0f4f3;
+}
+.motion-head p{margin:0;max-width:46ch;font-family:var(--f-grot);font-size:clamp(.7rem,.92vw,.84rem);line-height:1.62;color:#9aa5a3}
+.reels{display:grid;grid-template-columns:1.35fr 1.35fr .9fr;gap:clamp(8px,1.3vw,18px);min-height:0}
+.reel{display:grid;grid-template-rows:auto 1fr auto;gap:6px;min-height:0}
+.reel-bar{
+  display:flex;justify-content:space-between;gap:10px;
+  font-family:var(--f-mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:#5fe8b4;
+}
+.reel-bar span:last-child{color:#7f8a89}
+.gate{
+  position:relative;overflow:hidden;background:#07080a;
+  border:1px solid rgba(255,255,255,.12);
+  min-height:clamp(150px,30vh,380px);
+}
+.gate video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.gate.square video{object-fit:contain}
+.gate::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,rgba(255,255,255,.028) 0 1px,transparent 1px 3px);
+}
+.perf{position:absolute;left:0;top:0;bottom:0;width:11px;z-index:2;
+  background:repeating-linear-gradient(180deg,transparent 0 7px,rgba(255,255,255,.16) 7px 14px);
+  border-right:1px solid rgba(255,255,255,.1);
+}
+.reel-foot{
+  display:flex;justify-content:space-between;gap:8px;
+  font-family:var(--f-grot);font-size:clamp(.64rem,.82vw,.74rem);color:#b9c2c0;line-height:1.4;
+}
+.reel-foot b{font-weight:600;color:#eef3f2}
+.scrub{
+  display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;
+  border-top:1px solid rgba(255,255,255,.14);padding-top:9px;
+  font-family:var(--f-mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:#7f8a89;
+}
+.scrub .bar{height:2px;background:rgba(255,255,255,.14);position:relative;overflow:hidden}
+.scrub .bar i{position:absolute;left:0;top:0;bottom:0;width:34%;background:#5fe8b4;transform-origin:0 50%}
+
+/* ---------- duotone treatment for the editorial chapter ---------- */
+.press .pimg{filter:grayscale(1) contrast(1.16) brightness(.94) sepia(.42) hue-rotate(-14deg) saturate(1.5)}
+.tplate img{filter:saturate(.9) contrast(1.04)}
+
+@media (max-width:1000px){
+.study-pair{grid-template-columns:1fr;gap:clamp(10px,2vh,18px)}
+
+.reels{grid-template-columns:1fr 1fr}
+}
+@media (max-width:640px){
+.reels{grid-template-columns:1fr}
+
+.motion-head h2{font-size:clamp(1.5rem,8vw,2.2rem)}
+}
+
+/* real-image ink separations for the CMYK chapter */
+
+/* ============================================================
+   12 · MARKS — the wall. A hang, not a grid: plaster, raking
+   light, thin frames, brass plaques. Nothing else here is lit.
+   ============================================================ */
+#s-wall .pin{--pin-bg:#e4ded2;--pin-fg:#241f19}
+.wall-fx{
+  background:
+    radial-gradient(120% 70% at 50% -18%,rgba(255,248,230,.95),rgba(228,222,210,0) 62%),
+    radial-gradient(90% 60% at 50% 120%,rgba(84,68,48,.22),transparent 60%),
+    linear-gradient(180deg,#ece6da,#ddd6c8);
+}
+.wall-fx::after{
+  content:"";position:absolute;inset:0;opacity:.5;
+  background-image:var(--noise);background-size:180px 180px;mix-blend-mode:multiply;
+}
+.wall{display:grid;gap:clamp(10px,1.8vh,22px);grid-template-rows:auto auto 1fr auto;min-height:0}
+.wall .chap{color:#6b5334}
+.wall-head{display:flex;align-items:flex-end;justify-content:space-between;gap:clamp(14px,3vw,40px);flex-wrap:wrap}
+.wall-head h2{
+  margin:0;font-family:var(--f-deco,var(--f-serif));font-weight:400;
+  font-size:clamp(1.4rem,min(4.2vw,5.2vh),2.6rem);line-height:1.02;letter-spacing:.01em;color:#241f19;max-width:16ch;
+}
+.wall-head h2 em{font-style:italic;color:#7a5c2e}
+.wall-head p{margin:0;max-width:44ch;font-family:var(--f-grot);font-size:clamp(.68rem,.9vw,.8rem);line-height:1.6;color:#5d5347}
+.hang{
+  display:grid;grid-template-columns:repeat(8,minmax(0,1fr));
+  gap:clamp(6px,.9vw,14px);align-content:start;min-height:0;
+}
+.piece{
+  position:relative;display:grid;grid-template-rows:1fr auto;gap:5px;min-height:0;
+}
+.piece .frame-box{
+  position:relative;background:#fbf9f4;overflow:hidden;
+  border:1px solid rgba(36,31,25,.26);
+  padding:clamp(3px,.45vw,7px);
+  box-shadow:0 10px 18px -14px rgba(40,30,16,.85),0 2px 3px -2px rgba(40,30,16,.5);
+  aspect-ratio:1;
+}
+.piece .ph{position:absolute;inset:clamp(5px,.7vw,10px)}
+.plaque{
+  display:flex;justify-content:space-between;gap:5px;align-items:baseline;flex-wrap:wrap;
+  font-family:var(--f-mono);font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:#6b5f4d;
+}
+.plaque b{font-weight:400;color:#2b2519;letter-spacing:.1em}
+.wall-foot{
+  display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  border-top:1px solid rgba(36,31,25,.28);padding-top:8px;
+  font-family:var(--f-mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:#6b5f4d;
+}
+@media (max-width:1000px){
+.hang{grid-template-columns:repeat(6,minmax(0,1fr))}
+}
+@media (max-width:640px){
+.hang{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+
+/* ---- small-screen fit-ups (measured, not guessed) ---- */
+@media (max-width:1000px){
+.seps{gap:6px}
+.seps .sep{aspect-ratio:1}
+#s-cmyk .wrap{gap:clamp(6px,1.1vh,13px)}
+#s-cmyk .steps{gap:6px}
+}
+@media (max-width:700px){
+.swiss .plate .portrait{height:clamp(170px,30vh,300px)}
+
+#s-glass .gcards{gap:7px;grid-template-columns:repeat(2,minmax(0,1fr))}
+#s-glass .gcard{padding:10px 11px}
+#s-glass .gcard h3{font-size:.95rem}
+.contact .crow{padding:5px 0}
+
+.groovy{font-size:clamp(1.6rem,8.6vw,2.4rem)}
+}
+
+/* ============================================================
+   RATIO DISCIPLINE — a container takes the shape of the work,
+   or the work sits whole inside it. Nothing is cropped to fit.
+   ============================================================ */
+.ar{aspect-ratio:var(--ar,4/3)}
+.gate16{position:relative;aspect-ratio:16/9;overflow:hidden}
+
+/* 00 hero — each card in the tunnel is cut to its own plate */
+.tcard{aspect-ratio:var(--ar,3/4) !important;width:clamp(120px,15vw,224px)}
+.tcard.wide{width:clamp(150px,19vw,286px)}
+
+/* 01 swiss — the strip is three sixteen-nines */
+.swiss .strip .ph{flex:1;height:auto;aspect-ratio:16/9;background:#dedbd4}
+
+/* 03 glass — the plate strip is a sixteen-nine */
+.gcard .ph{height:auto;aspect-ratio:16/9;background:rgba(8,6,24,.5)}
+
+/* 04 cmyk — the sheet takes the shape of the piece being printed */
+.seps{aspect-ratio:var(--ar,5/4);max-height:46vh;width:auto;margin-inline:auto}
+.cmyk .sidefigs .ph{aspect-ratio:3/4;background:#f4f2ee;border:1px solid rgba(17,17,17,.14)}
+
+/* 05 brutalist — plates whole on paper, still hard-edged */
+
+/* 06 y2k — a sixteen-nine row with captions */
+.y2kgal{grid-template-columns:repeat(3,1fr);gap:clamp(8px,1.1vw,14px)}
+.y2kgal figure{margin:0;display:grid;gap:6px}
+.y2kgal .ph{aspect-ratio:16/9;overflow:hidden;border:1px solid rgba(160,200,255,.4);border-radius:3px}
+.y2kgal figcaption{font-family:var(--f-mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#8fa8d8}
+
+/* 07 fields — the tribute posters are nine-sixteens */
+.plate2 .ph{aspect-ratio:9/16;max-height:34vh}
+
+/* 08 archive — the trail prints each plate at its own proportion */
+.tplate{aspect-ratio:var(--ar,4/5)}
+
+/* 10 deco — the arch is cut to the poster */
+.arch{aspect-ratio:9/16;width:clamp(96px,11vw,150px)}
+
+/* 11 study — marks sit whole inside the drawing */
+
+/* ============================================================
+   12 · MARKS — larger frames, each at the mark's own proportion
+   ============================================================ */
+.hang{grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(10px,1.5vw,22px)}
+.piece .frame-box{aspect-ratio:var(--ar,1);padding:clamp(8px,1vw,15px)}
+.plaque{font-size:9px}
+
+/* ============================================================
+   13 · BROADCAST — sixteen-nine, feed-sized. Amber on near-black,
+   a contact-sheet rhythm: every frame the same shape, on purpose.
+   ============================================================ */
+#s-cast .pin{--pin-bg:#0d0e12;--pin-fg:#f0eee9}
+.cast-fx{
+  background:
+    radial-gradient(1100px 700px at 84% 12%,rgba(255,210,63,.10),transparent 60%),
+    repeating-linear-gradient(0deg,rgba(255,255,255,.022) 0 1px,transparent 1px 3px);
+}
+.cast{display:grid;gap:clamp(10px,1.7vh,20px);grid-template-rows:auto auto 1fr auto;min-height:0}
+.cast .chap{color:#ffd23f}
+.cast-head{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:clamp(16px,3vw,44px);align-items:end}
+.cast-head h2{
+  margin:0;font-family:var(--f-grot);font-weight:600;
+  font-size:clamp(1.5rem,min(4.6vw,6vh),3rem);line-height:1;letter-spacing:-.04em;color:#f6f4ef;
+}
+.cast-head h2 i{font-style:normal;color:#ffd23f}
+.cast-head p{margin:0;font-family:var(--f-grot);font-size:clamp(.72rem,.92vw,.84rem);line-height:1.62;color:#a5a29b}
+
+.bgridx{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:1fr 1fr;
+  gap:clamp(9px,1.4vw,20px);align-content:start;min-height:clamp(210px,39vh,450px);
+}
+.bcard{margin:0;display:grid;gap:6px}
+.bcard .gate16{border:1px solid rgba(255,255,255,.12);background:#07080a}
+.bcard figcaption{
+  display:flex;justify-content:space-between;gap:8px;
+  font-family:var(--f-mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:#8b877f;
+}
+.bcard figcaption b{font-weight:400;color:#efece6}
+.rosterstrip{
+  display:grid;grid-template-columns:minmax(0,1.35fr) repeat(5,minmax(0,1fr));
+  gap:clamp(8px,1.1vw,15px);align-items:end;
+  border-top:1px solid rgba(255,255,255,.16);padding-top:clamp(9px,1.5vh,16px);
+}
+.rlead{display:grid;gap:6px;align-content:end}
+.rlead b{font-family:var(--f-mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:#ffd23f;font-weight:400}
+.rlead span{font-family:var(--f-grot);font-size:clamp(.66rem,.84vw,.76rem);line-height:1.55;color:#9d9a93}
+.rcard{margin:0;display:grid;gap:5px}
+.rcard .ph{background:#0a0809;border:1px solid rgba(255,255,255,.1);overflow:hidden}
+.rcard figcaption{
+  display:flex;justify-content:space-between;gap:6px;
+  font-family:var(--f-mono);font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:#8b877f;
+}
+.rcard figcaption b{font-weight:400;color:#e9e6e0}
+
+/* ============================================================
+   14 · MOTION — the gate is the frame's own shape; the film is
+   never cropped to fill it.
+   ============================================================ */
+.gate{min-height:0}
+.gate video{object-fit:contain}
+.reels{grid-template-columns:1.3fr 1.3fr .82fr;align-items:start}
+
+@media (max-width:1000px){
+.hang{grid-template-columns:repeat(4,minmax(0,1fr))}
+
+.cast-head{grid-template-columns:1fr;gap:10px}
+
+.rosterstrip{grid-template-columns:repeat(5,minmax(0,1fr))}
+.rlead{grid-column:1/-1}
+.y2kgal{grid-template-columns:repeat(3,1fr)}
+}
+@media (max-width:640px){
+.hang{grid-template-columns:repeat(3,minmax(0,1fr))}
+
+.rosterstrip{grid-template-columns:repeat(3,minmax(0,1fr))}
+
+.plate2 .ph{max-height:26vh}
+.y2kgal{grid-template-columns:1fr 1fr}
+}
+
+/* height-driven fitting: the frame keeps 16:9 and shrinks to the row,
+   so a chapter never has to crop or overflow to hold six of them. */
+.gate16 .ph{position:absolute;inset:0}
+
+.bcard{min-height:0;grid-template-rows:minmax(0,1fr) auto}
+.bcard .gate16{height:100%;width:auto;max-width:100%;justify-self:center;aspect-ratio:16/9}
+.cast-head h2{font-size:clamp(1.35rem,min(3.9vw,5vh),2.5rem)}
+.rosterstrip{max-height:clamp(118px,21vh,236px);align-items:stretch}
+.rcard{min-height:0;grid-template-rows:minmax(0,1fr) auto}
+.rcard .ph{height:100%;width:auto;max-width:100%;margin-inline:auto;position:relative}
+.rlead{min-height:0;overflow:hidden}
+
+.rosterstrip{min-height:clamp(110px,19vh,215px)}
+
+.bcard,
+.rcard{width:fit-content;max-width:100%;margin-inline:auto}
+.bcard figcaption,
+.rcard figcaption{width:100%}
+
+/* cmyk sheet: height-led so the plate keeps the piece's own shape */
+.seps{height:clamp(210px,44vh,430px);width:auto;max-height:none;aspect-ratio:5/4}
+/* swiss strip: three sixteen-nines, height-led so the chapter still fits */
+.swiss .strip{align-items:flex-start}
+.swiss .strip .ph{flex:0 1 auto;height:clamp(64px,12vh,132px);width:auto;aspect-ratio:16/9}
+
+/* 06 · LSM — four product frames, each at its own proportion */
+.y2kgal{grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(7px,1vw,13px)}
+.y2kgal .ph{aspect-ratio:var(--ar,16/9);background:#080b0e}
+.y2k-row{align-items:start}
+
+.hang{grid-template-columns:repeat(6,minmax(0,1fr));gap:clamp(8px,1.2vw,17px)}
+
+@media (max-width:1000px){
+.hang{grid-template-columns:repeat(5,minmax(0,1fr))}
+}
+@media (max-width:640px){
+.hang{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+
+/* the board reads as one set: same square chip, same frame, same air */
+.piece .frame-box{aspect-ratio:1;padding:0;background:transparent;border:1px solid rgba(36,31,25,.22)}
+.piece .frame-box .ph{position:absolute;inset:0}
+.hang{grid-template-columns:repeat(6,minmax(0,1fr))}
+
+/* the tribute plates are nine-sixteens; at narrow widths show two, not four */
+@media (max-width:1000px){
+.plate2{grid-template-columns:repeat(4,minmax(0,1fr));column-gap:8px}
+.plate2 .ph{max-height:26vh}
+.plate2 figure:nth-child(2),
+.plate2 figure:nth-child(3){transform:none}
+}
+@media (max-width:640px){
+.plate2{grid-template-columns:repeat(2,minmax(0,1fr))}
+
+.plate2 .ph{max-height:30vh}
+}
+
+/* ============================================================
+   02 · BENTO — columns, not a fixed grid. Each plate is exactly
+   the shape of the work; the text tiles absorb the slack, so a
+   column ends flush without a single pixel of letterboxing.
+   ============================================================ */
+
+/* ============================================================
+   DEVICE PASS — the pinned stage is one screen on every device,
+   so each chapter sheds detail rather than overflowing it.
+   ============================================================ */
+
+/* --- the chapter rule never pushes the line wider than the screen --- */
+.chap{flex-wrap:wrap;row-gap:4px}
+.chap .rule{min-width:24px}
+@media (max-width:520px){
+.chap{font-size:9px;letter-spacing:.18em;gap:9px}
+.chap .rule{flex:1 1 30px}
+}
+
+/* --- the press sheet is height-led; keep it inside narrow screens --- */
+.seps{max-width:100%}
+@media (max-width:1000px){
+.seps{height:auto;width:100%;max-height:38vh}
+.seps .sep{position:absolute;inset:0}
+}
+
+/* --- short laptops (768–820 tall): every chapter tightens a notch --- */
+@media (min-width:1001px) and (max-height:820px){
+.frame{padding-block:clamp(44px,6vh,64px)}
+.cmyk{gap:clamp(14px,2.4vw,34px)}
+.seps{height:clamp(180px,38vh,320px)}
+.cmyk .sidefigs{margin-top:8px}
+.cmyk .sidefigs .ph{aspect-ratio:16/11}
+.steps li{padding-top:7px}
+.steps p{font-size:.72rem;line-height:1.4;max-width:52ch}
+.plate2 .ph{max-height:30vh}
+.press{gap:clamp(16px,2.6vw,40px)}
+.marks span{padding-block:8px}
+}
+
+/* --- small phones: drop the optional furniture --- */
+@media (max-width:420px){
+.swiss .body{font-size:.76rem;line-height:1.5}
+
+.neu .dial{display:none}
+}
+
+.cue-touch{display:none}
+@media (max-width:1000px){
+.trailcue .tag{white-space:normal;flex:1 1 auto;min-width:0}
+.cue-desk{display:none}
+.cue-touch{display:inline}
+.cursorline{display:none}
+}
+
+/* offscreen chapters cost nothing to render; the box is still reserved
+   by the stage's own height, so scroll maths and sticky pins are exact */
+.stage{content-visibility:auto;contain-intrinsic-size:auto 100vw auto 220vh}
+#s-hero{content-visibility:visible}
+
+/* 14 · MOTION — three gates, one baseline. Height leads, the frame
+   keeps its own shape, so the square cut sits flush with the two 16:9s. */
+.reels{align-items:start}
+.reel{grid-template-rows:auto minmax(0,1fr) auto}
+.gate{height:clamp(150px,30vh,330px);width:auto;max-width:100%;justify-self:start}
+.gate.wide169{aspect-ratio:16/9}
+.gate.square{aspect-ratio:1}
+.reel-bar,
+.reel-foot{max-width:100%}
+
+/* 08 · ARCHIVE — ink, not soot. Multiply stacked plates to black was the
+   bug; each pass now sits on paper at partial strength and the overlaps
+   build tone instead of mud. */
+.tplate{mix-blend-mode:normal;box-shadow:0 14px 34px -26px rgba(26,26,24,.55)}
+.tplate img{filter:saturate(.86) contrast(1.03) brightness(1.04)}
+.tplate::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(200deg,rgba(255,79,154,.16),rgba(26,68,255,.14));
+  mix-blend-mode:screen;
+}
+
+/* 05 · ASABCORE — plates are ink blocks: full column width, own height,
+   hard black rules between. No grey air, nothing cropped. */
+
+/* one plate per column, full width, its own height; the panel above
+   takes whatever is left, so the column ends flush on a black rule */
+
+/* the plate fills the space that is actually left, keeps its own shape,
+   and the surrounding black reads as ink rather than dead grey */
+
+/* ============================================================
+   11 · LOGO STUDY — a case sheet, not a fake construction plan.
+   Every mark gets the same four tests, side by side, so the two
+   can actually be compared.
+   ============================================================ */
+#s-study .pin{--pin-bg:#f2f0ea;--pin-fg:#15181b}
+.study-fx{
+  background:
+    radial-gradient(1000px 700px at 88% 6%,rgba(27,79,118,.08),transparent 62%),
+    linear-gradient(rgba(21,24,27,.045) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(21,24,27,.045) 1px,transparent 1px);
+  background-size:auto,auto,88px 88px,88px 88px;
+}
+.study-fx::after{content:none}
+.study{display:grid;gap:clamp(10px,1.8vh,22px);grid-template-rows:auto auto minmax(0,1fr)}
+.study .chap{color:#1b4f76}
+.study-head h2{
+  font-family:var(--f-serif);font-weight:400;text-transform:none;
+  font-size:clamp(1.6rem,min(4.6vw,5.8vh),3.1rem);letter-spacing:-.015em;color:#15181b;
+}
+.study-head .sheetno{color:#6b7076;letter-spacing:.2em}
+.study-pair{grid-template-columns:1fr 1fr;gap:clamp(16px,2.6vw,44px);min-height:0}
+.scase{display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:clamp(9px,1.4vh,16px);min-height:0}
+.scase-top{border-bottom:1.5px solid #15181b;padding-bottom:7px}
+.scase-top b{font-family:var(--f-grot);font-weight:600;font-size:clamp(.9rem,1.5vw,1.2rem);letter-spacing:-.02em;text-transform:none}
+.scase-top span{color:#6b7076}
+.scase-body{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:clamp(10px,1.6vw,22px);min-height:0}
+.smark{
+  margin:0;position:relative;background:#fff;border:1px solid rgba(21,24,27,.14);
+  box-shadow:0 18px 40px -34px rgba(15,25,40,.6);min-height:0;
+}
+.smark .ph{position:absolute;inset:clamp(10px,1.6vw,26px)}
+.stests{display:grid;grid-template-rows:auto auto minmax(0,1fr);gap:clamp(8px,1.3vh,15px);min-height:0}
+.stest{display:grid;gap:6px;align-content:start;min-height:0}
+.stest .lbl{font-family:var(--f-mono);font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:#1b4f76}
+.strip{display:flex;align-items:flex-end;gap:clamp(8px,1.2vw,16px)}
+.st{display:grid;justify-items:center;gap:5px}
+.st i{display:block;overflow:hidden;background:#fff;border:1px solid rgba(21,24,27,.12)}
+.st i img{width:100%;height:100%;object-fit:contain;display:block}
+.st em{font-family:var(--f-mono);font-style:normal;font-size:8px;letter-spacing:.12em;color:#8d9298}
+.swatches{display:flex;gap:6px;flex-wrap:wrap}
+.sw{display:grid;gap:4px;justify-items:center}
+.sw i{width:clamp(26px,3.2vw,44px);height:clamp(20px,2.4vw,30px);background:var(--c);display:block;border:1px solid rgba(21,24,27,.14)}
+.sw em{font-family:var(--f-mono);font-style:normal;font-size:7.5px;letter-spacing:.06em;color:#8d9298}
+.alts{display:grid;grid-template-columns:1fr 1fr;gap:8px;min-height:0}
+.alt{position:relative;background:#fff;border:1px solid rgba(21,24,27,.12);overflow:hidden;min-height:0}
+.alt .ph{position:absolute;inset:6px}
+.snotes{gap:5px}
+.snote{font-size:clamp(.64rem,.84vw,.75rem);color:#3a4046}
+.snote em{background:#1b4f76}
+@media (max-width:1000px){
+.study-pair{grid-template-columns:1fr}
+
+.scase-body{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr)}
+}
+@media (max-width:640px){
+.scase-body{grid-template-columns:1fr}
+}
+
+/* ============================================================
+   12 · MARKS — regraded. Warm dark ground, specimen tiles, the
+   same ember accent the Fields chapter uses.
+   ============================================================ */
+#s-wall .pin{--pin-bg:#17140f;--pin-fg:#ede5d6}
+.wall-fx{
+  background:
+    radial-gradient(1300px 900px at 82% 8%,rgba(226,67,31,.16),transparent 60%),
+    radial-gradient(1000px 800px at 6% 94%,rgba(237,229,214,.07),transparent 58%),
+    linear-gradient(180deg,#191510,#141109);
+}
+.wall-fx::after{
+  content:"";position:absolute;left:clamp(22px,4.4vw,74px);right:clamp(22px,4.4vw,74px);top:0;bottom:0;
+  background-image:linear-gradient(90deg,rgba(237,229,214,.07) 1px,transparent 1px);
+  background-size:calc(100%/6) 100%;opacity:1;mix-blend-mode:normal;
+}
+.wall .chap{color:rgba(237,229,214,.72)}
+.wall-head h2{
+  font-family:var(--f-serif);font-style:normal;font-weight:400;color:#ede5d6;
+  font-size:clamp(1.6rem,min(5vw,6.2vh),3.1rem);max-width:none;
+}
+.wall-head h2 em{font-style:italic;color:#e2431f}
+.wall-head p{color:rgba(237,229,214,.62);max-width:46ch}
+.piece .frame-box{
+  border:1px solid rgba(237,229,214,.16);background:#0f0d09;
+  box-shadow:0 22px 44px -30px rgba(0,0,0,.9);
+}
+.piece .frame-box::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
+}
+.piece .pimg{filter:contrast(1.02)}
+.plaque{color:rgba(237,229,214,.42)}
+.plaque b{color:#ede5d6}
+.wall-foot{border-top:1px solid rgba(237,229,214,.22);color:rgba(237,229,214,.45)}
+
+.stest.grow{min-height:clamp(70px,12vh,140px)}
+.alts{grid-template-columns:1fr 1fr;height:100%;min-height:clamp(64px,11vh,128px)}
+.st i{border-radius:2px}
+
+.tplate img{filter:saturate(.94) contrast(1.1) brightness(1.01)}
+.tplate::after{background:linear-gradient(200deg,rgba(255,79,154,.10),rgba(26,68,255,.09))}
+
+/* ============================================================
+   FIT RULE (overrides the earlier height-driven experiment).
+   A plate must fit BOTH dimensions of the space it is given.
+   Sizing the box by ratio alone let wide plates run past the
+   column and get sliced; the image itself now does the fitting,
+   so nothing is ever cropped and nothing ever overflows.
+   ============================================================ */
+
+/* the roster strip had the same hazard */
+.rcard .ph{height:100%;width:100%;position:relative}
+.rcard .pimg{object-fit:contain}
+
+/* and the reel gates: cap on both axes */
+.gate{max-width:100%;max-height:100%}
+
+/* stack fix: the plate fills its box on both axes, the image does the fitting */
+
+/* ============================================================
+   15 · CONTACT — the rings breathe: each pass expands out of the
+   sun and dissolves into the paper, a new one rising behind it.
+   ============================================================ */
+@keyframes ripple{
+0%{transform:scale(.72);opacity:0}
+14%{opacity:.26}
+62%{opacity:.16}
+100%{transform:scale(1.42);opacity:0}
+}
+
+/* ============================================================
+   12 · MARKS — a specimen sheet. Espresso ground, ghosted word
+   behind, marks cut to one square on one paper, numbered.
+   ============================================================ */
+#s-wall .pin{--pin-bg:#141009;--pin-fg:#ece2d0}
+.wall-fx{
+  background:
+    radial-gradient(1200px 820px at 84% 4%,rgba(226,110,31,.16),transparent 58%),
+    radial-gradient(900px 700px at 2% 100%,rgba(120,60,20,.20),transparent 62%),
+    linear-gradient(168deg,#1b1610 0%,#140f09 52%,#0e0b07 100%);
+}
+.wall-fx::after{
+  content:"MARKS";
+  position:absolute;left:-2.5vw;bottom:-7vh;
+  font-family:var(--f-black);font-size:min(30vw,34vh);line-height:.7;
+  color:rgba(236,226,208,.035);letter-spacing:-.05em;
+  background:none;mix-blend-mode:normal;
+}
+.wall{grid-template-rows:auto auto minmax(0,1fr) auto;gap:clamp(10px,1.8vh,22px)}
+.wall .chap{color:rgba(236,226,208,.6)}
+.wall-head{align-items:flex-end}
+.wall-head h2{
+  font-family:var(--f-serif);font-weight:400;color:#f3ead9;line-height:1.02;
+  font-size:clamp(1.5rem,min(4.6vw,5.8vh),3rem);max-width:14ch;letter-spacing:-.01em;
+}
+.wall-head h2 em{font-style:italic;color:#e2803f}
+.wall-head p{color:rgba(236,226,208,.55);max-width:44ch;font-size:clamp(.68rem,.88vw,.79rem);line-height:1.62}
+
+.hang{
+  grid-template-columns:repeat(6,minmax(0,1fr));
+  gap:clamp(10px,1.5vw,26px) clamp(8px,1.2vw,20px);
+  align-content:center;
+}
+.piece{position:relative;grid-template-rows:auto auto;gap:8px}
+.pno{
+  position:absolute;left:0;top:-2px;z-index:3;
+  font-family:var(--f-mono);font-size:8px;letter-spacing:.16em;color:rgba(236,226,208,.30);
+}
+.piece .frame-box{
+  aspect-ratio:1;padding:0;overflow:hidden;position:relative;
+  background:#f4f1ea;border:0;border-radius:3px;
+  box-shadow:0 20px 34px -24px rgba(0,0,0,.85),0 0 0 1px rgba(236,226,208,.10);
+  margin-top:10px;
+}
+.piece .frame-box::after{
+  content:"";position:absolute;inset:0;pointer-events:none;border-radius:3px;
+  background:linear-gradient(158deg,rgba(255,255,255,.20),rgba(255,255,255,0) 34%,rgba(20,14,8,.10));
+}
+.plaque{
+  display:grid;gap:1px;text-align:left;
+  border-top:1px solid rgba(236,226,208,.14);padding-top:6px;
+}
+.plaque b{
+  font-family:var(--f-serif);font-weight:400;font-size:clamp(.74rem,1vw,.92rem);
+  letter-spacing:.005em;text-transform:none;color:#f0e7d6;line-height:1.15;
+}
+.plaque span{
+  font-family:var(--f-mono);font-size:7.6px;letter-spacing:.18em;text-transform:uppercase;
+  color:rgba(236,226,208,.42);
+}
+.wall-foot{
+  border-top:1px solid rgba(236,226,208,.18);color:rgba(236,226,208,.42);
+}
+.wall-foot span:last-child{color:#e2803f}
+@media (max-width:1000px){
+.hang{grid-template-columns:repeat(5,minmax(0,1fr))}
+
+.wall-fx::after{display:none}
+}
+@media (max-width:640px){
+.hang{grid-template-columns:repeat(3,minmax(0,1fr))}
+
+.pno{display:none}
+}
+
+/* ---------- the mark, present ---------- */
+.ghostmark{
+  position:absolute;left:50%;top:47%;
+  width:min(86vh,74vw);height:auto;
+  transform:translate(-50%,-50%);
+  color:#f2ece1;opacity:.055;
+  filter:drop-shadow(0 0 60px rgba(226,67,31,.35));
+  animation:ghostdrift 22s ease-in-out infinite;
+}
+@keyframes ghostdrift{
+0%,
+100%{transform:translate(-50%,-50%) scale(1) rotate(0deg)}
+50%{transform:translate(-50%,-52%) scale(1.035) rotate(1.2deg)}
+}
+.hudmark{width:13px;height:13px;flex:none;opacity:.9}
+#hud .now{gap:9px}
+@media (prefers-reduced-motion:reduce){
+.ghostmark{animation:none}
+}
+
+/* the roster poster leads the strip, whole and face-free */
+.rosterstrip{grid-template-columns:auto minmax(0,1.15fr) repeat(5,minmax(0,1fr))}
+.rposter{margin:0;position:relative;height:100%;display:flex;align-items:flex-end}
+.rposter .ph{height:100%;width:auto;aspect-ratio:var(--ar,.8);border:1px solid rgba(255,255,255,.14);overflow:hidden}
+@media (max-width:1000px){
+.rosterstrip{grid-template-columns:auto repeat(5,minmax(0,1fr))}
+.rlead{grid-column:1/-1}
+}
+@media (max-width:640px){
+.rosterstrip{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+
+.wall-fx::after{
+  left:auto;right:-3vw;bottom:auto;top:38%;
+  font-size:min(24vw,26vh);color:rgba(236,226,208,.028);
+}
+.wall{padding-bottom:clamp(6px,1.4vh,16px)}
+.wall-foot{padding-bottom:2px}
+
+@media (min-width:1001px) and (max-height:820px){
+.hang{gap:clamp(7px,1vw,15px) clamp(6px,.9vw,14px)}
+.piece .frame-box{margin-top:8px}
+.plaque b{font-size:.74rem}
+.wall-head h2{font-size:clamp(1.3rem,3.4vw,2.1rem)}
+.wall-head p{font-size:.7rem;line-height:1.5}
+.wall{gap:clamp(7px,1.2vh,14px)}
+.pno{font-size:7px}
+.plaque{padding-top:4px}
+.plaque span{font-size:7px}
+}
+@media (max-width:400px){
+.swiss .plate figcaption{display:none}
+}
+
+/* 10 · RECOGNITION — one honour, given the room a single honour
+   deserves; the ledger under it states plain facts, not prizes. */
+.award{display:grid;justify-items:center;gap:clamp(4px,.8vh,9px);text-align:center;margin-top:clamp(2px,.6vh,8px)}
+.award .yr{font-family:var(--f-mono);font-size:10px;letter-spacing:.34em;color:#caa53d}
+.award .ti{
+  margin:0;font-family:var(--f-deco);font-weight:400;
+  font-size:clamp(1.5rem,min(4.6vw,6vh),3rem);line-height:1;letter-spacing:.03em;color:#f0e6c6;
+}
+.award .by{
+  margin:0;font-family:var(--f-mono);font-size:clamp(.6rem,.82vw,.73rem);
+  letter-spacing:.2em;text-transform:uppercase;color:rgba(233,220,180,.62);max-width:52ch;
+}
+.awards.ledger{grid-template-columns:repeat(3,minmax(0,1fr));margin-top:clamp(4px,1vh,12px)}
+.awards.ledger li{text-align:center;justify-items:center;gap:4px}
+.awards.ledger .yr{letter-spacing:.2em}
+.awards.ledger .ti{font-size:clamp(.84rem,1.15vw,1rem)}
+@media (max-width:640px){
+.awards.ledger{grid-template-columns:1fr}
+}
+
+/* the text tiles hold their content together instead of stretching it
+   to the corners of a tall empty box */
+
+/* 05 · plate strips: each plate keeps its own shape at full strip height,
+   the last one takes whatever width is left so the row ends flush on ink */
+
+/* a plate that takes exactly the space the ratio-true plates leave over,
+   so a column ends flush without a text tile holding the slack */
+
+/* the strip ends on an ink block, not on a sliced plate */
+
+/* ============================================================
+   12 · THE BOARD — a frame that holds one mark at a time and
+   cycles the set; click a chip and it stays. The frame is fixed,
+   the mark inside keeps its own proportion.
+   ============================================================ */
+.boardwrap{
+  display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.5fr);
+  gap:clamp(16px,2.6vw,44px);align-items:center;min-height:0;
+}
+.bigframe{
+  position:relative;margin:0;display:grid;grid-template-rows:minmax(0,1fr) auto auto;
+  gap:clamp(8px,1.4vh,16px);min-height:0;height:100%;
+}
+.bfplate{
+  position:relative;overflow:hidden;border-radius:4px;min-height:0;
+  background:var(--bg,#f4f1ea);
+  box-shadow:0 34px 60px -34px rgba(0,0,0,.9),0 0 0 1px rgba(236,226,208,.14);
+  transition:background .6s ease;
+}
+.bfplate img{
+  position:absolute;inset:clamp(16px,2.4vw,42px);
+  width:calc(100% - 2*clamp(16px,2.4vw,42px));height:calc(100% - 2*clamp(16px,2.4vw,42px));
+  object-fit:contain;opacity:0;transform:scale(.985);
+  transition:opacity .55s cubic-bezier(.22,.9,.28,1),transform .8s cubic-bezier(.22,.9,.28,1);
+}
+.bfplate img.on{opacity:1;transform:scale(1)}
+.bfcorner{position:absolute;width:14px;height:14px;border:1px solid rgba(236,226,208,.34);z-index:3}
+.bfcorner.tl{left:-5px;top:-5px;border-right:0;border-bottom:0}
+.bfcorner.tr{right:-5px;top:-5px;border-left:0;border-bottom:0}
+.bfcorner.bl{left:-5px;bottom:calc(100% - 100%);bottom:-5px;border-right:0;border-top:0}
+.bfcorner.br{right:-5px;bottom:-5px;border-left:0;border-top:0}
+.bfcap{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.bfcap .bfno{font-family:var(--f-mono);font-size:9px;letter-spacing:.2em;color:#e2803f}
+.bfcap b{font-family:var(--f-serif);font-weight:400;font-size:clamp(1rem,1.7vw,1.5rem);color:#f3ead9;line-height:1}
+.bfcap span:last-child{font-family:var(--f-mono);font-size:8.5px;letter-spacing:.2em;text-transform:uppercase;color:rgba(236,226,208,.45);margin-left:auto}
+.bfbar{display:block;height:1px;background:rgba(236,226,208,.16);position:relative;overflow:hidden}
+.bfbar i{position:absolute;left:0;top:0;bottom:0;width:0%;background:#e2803f}
+
+.hang{grid-template-columns:repeat(6,minmax(0,1fr));gap:clamp(7px,1.1vw,16px) !important;align-content:center}
+.piece{
+  appearance:none;background:none;border:0;padding:0;margin:0;color:inherit;text-align:left;
+  cursor:pointer;display:grid;grid-template-rows:auto auto;gap:6px;position:relative;
+}
+.piece .frame-box{
+  display:block;position:relative;aspect-ratio:1;overflow:hidden;border-radius:3px;background:#f4f1ea;
+  box-shadow:0 14px 24px -20px rgba(0,0,0,.85),0 0 0 1px rgba(236,226,208,.10);
+  margin-top:10px;transition:transform .35s cubic-bezier(.22,.9,.28,1),box-shadow .35s ease,filter .35s ease;
+  filter:saturate(.82) brightness(.86);
+}
+.piece .frame-box .ph{position:absolute;inset:0;display:block}
+.piece:hover .frame-box,
+.piece:focus-visible .frame-box{transform:translateY(-3px);filter:none}
+.piece.active .frame-box{
+  filter:none;transform:translateY(-3px);
+  box-shadow:0 18px 30px -18px rgba(0,0,0,.9),0 0 0 1px #e2803f,0 0 0 4px rgba(226,128,63,.18);
+}
+.piece.active .plaque b{color:#e2803f}
+.piece .plaque{border-top:1px solid rgba(236,226,208,.14);padding-top:5px;display:grid;gap:1px}
+@media (max-width:1000px){
+.boardwrap{grid-template-columns:1fr;gap:clamp(10px,2vh,18px)}
+.bigframe{display:none}
+.hang{grid-template-columns:repeat(5,minmax(0,1fr)) !important}
+}
+
+/* the split words in flip/blur need room to move without clipping */
+[data-anim="flip"] .w,
+[data-anim="blur"] .w{overflow:visible}
+[data-anim="wipe"]{will-change:clip-path,transform}
+
+/* 05 · two plate rows per column — eight pieces, none cropped, no dead paper */
+
+/* 15 · CONTACT — six discrete rings rise out of the sun and dissolve.
+   One pattern instead of two overlapping fields, so nothing beats. */
+.ripple{
+  position:absolute;right:-14%;bottom:-46%;
+  width:min(120vh,104vw);aspect-ratio:1;
+  pointer-events:none;
+}
+.ripple i{
+  position:absolute;inset:0;border-radius:50%;
+  border:clamp(6px,1.1vw,15px) solid #c0492a;
+  opacity:0;transform:scale(.18);
+  animation:ring 11s cubic-bezier(.28,.05,.34,1) infinite;
+  will-change:transform,opacity;
+}
+.ripple i:nth-child(2){animation-delay:-1.83s;border-color:#e0a233}
+.ripple i:nth-child(3){animation-delay:-3.66s}
+.ripple i:nth-child(4){animation-delay:-5.5s;border-color:#e0a233}
+.ripple i:nth-child(5){animation-delay:-7.33s}
+.ripple i:nth-child(6){animation-delay:-9.16s;border-color:#e0a233}
+@keyframes ring{
+0%{transform:scale(.16);opacity:0}
+9%{opacity:.30}
+70%{opacity:.13}
+100%{transform:scale(1.06);opacity:0}
+}
+@media (prefers-reduced-motion:reduce){
+.ripple i{animation:none;opacity:.14;transform:scale(.7)}
+}
+
+/* justified rows: each plate's width grows in proportion to its own ratio,
+   so a row of mixed shapes fills edge to edge at one shared height */
+
+/* the cross-dissolve now starts earlier and clears later, so two chapters
+   share a beat instead of cutting */
+.veil{transition:none}
+.veil::after{
+  content:"";position:absolute;left:0;right:0;bottom:0;height:clamp(60px,10vh,130px);
+  background:linear-gradient(to top,rgba(0,0,0,.28),transparent);
+}
+
+/* ============================================================
+   PHONE — portrait layouts, not landscape ones squeezed. Type
+   goes up, counts go down, every chapter keeps one clear idea.
+   ============================================================ */
+@media (max-width:700px){
+.frame{padding:16px;padding-block:clamp(54px,7.5vh,80px)}
+.chap{font-size:9.5px;letter-spacing:.16em}
+
+/* 01 statement */
+.swiss h2{font-size:clamp(1.4rem,7vw,2rem);line-height:1.08}
+.swiss .body{font-size:.8rem;line-height:1.55}
+
+/* 02 selected work — two columns, plates big enough to read */
+
+/* 03 capabilities — two up, plates visible again */
+#s-glass .gcards{grid-template-columns:1fr 1fr;gap:8px}
+#s-glass .gcard{min-height:0;padding:11px}
+#s-glass .gcard .ph{display:block;aspect-ratio:16/9;height:auto;margin-top:8px}
+
+#s-glass .gcard h3{font-size:.92rem}
+.glass-head h2{font-size:clamp(1.4rem,7.4vw,2.1rem)}
+.glass-note{display:none}
+
+/* 04 process — the sheet leads, the steps follow */
+.cmyk{grid-template-columns:1fr;gap:14px}
+.seps{height:auto;width:100%;aspect-ratio:5/4;max-height:34vh}
+.cmyk h2{font-size:clamp(1.4rem,7vw,2rem)}
+.steps li{grid-template-columns:auto auto 1fr;padding-top:7px}
+
+.steps h3{font-size:.9rem}
+
+/* 05 asabcore — one plate row, type large */
+
+/* 06 LSM — two product frames, stacked copy */
+.y2kgal{grid-template-columns:1fr 1fr;gap:6px}
+
+.chrome{font-size:clamp(3.4rem,26vw,6rem)}
+.win p{font-size:.72rem;line-height:1.5}
+
+/* 07 fields — two tributes, quote large */
+.pullquote{font-size:clamp(1.05rem,5.6vw,1.5rem);line-height:1.18}
+.plate2{grid-template-columns:1fr 1fr;column-gap:8px}
+
+.plate2 .ph{max-height:32vh}
+.marks span{padding-block:7px;font-size:.6rem}
+
+/* 08 archive — a printed sheet instead of an empty one */
+.riso-head h2{font-size:clamp(2rem,13vw,3rem)}
+.riso-note p{font-size:.68rem}
+
+/* 09 stack — four tools, bigger cards */
+.neu{gap:14px}
+.neu h2{font-size:clamp(1.4rem,7.4vw,2.1rem)}
+.neugrid{grid-template-columns:1fr 1fr;gap:9px}
+.ntile{padding:11px;border-radius:15px}
+.ntile p{font-size:.66rem;line-height:1.4}
+.ntile .bar{display:none}
+
+/* 10 recognition */
+.award .ti{font-size:clamp(1.5rem,9vw,2.2rem)}
+.deco h2{font-size:clamp(1.5rem,8vw,2.2rem)}
+
+/* 11 case sheet */
+.study-head h2{font-size:clamp(1.3rem,7vw,1.9rem)}
+.smark{min-height:26vh}
+
+/* 12 the board — chips large enough to tap */
+.hang{grid-template-columns:repeat(3,minmax(0,1fr)) !important;gap:9px !important}
+
+.wall-head h2{font-size:clamp(1.4rem,7.6vw,2.1rem)}
+.plaque b{font-size:.72rem}
+
+/* 13 broadcast — two frames and the roster */
+
+.cast-head h2{font-size:clamp(1.3rem,7vw,1.9rem)}
+.rosterstrip{grid-template-columns:repeat(3,minmax(0,1fr));min-height:0}
+
+/* 14 motion — one reel, full width */
+.reels{grid-template-columns:1fr;gap:10px}
+
+.gate{height:auto !important;width:100%;aspect-ratio:16/9}
+.motion-head h2{font-size:clamp(1.5rem,8.4vw,2.2rem)}
+
+/* 15 contact */
+.groovy{font-size:clamp(1.7rem,10.5vw,2.6rem)}
+
+.logo3d{width:clamp(96px,26vw,140px)}
+}
+
+/* supersede the earlier nth-of-type guesses: keep two real columns */
+
+@media (max-width:700px){
+/* strips need a real height once the columns stop filling the screen */
+
+/* broadcast: four frames and three roster cards */
+
+.rosterstrip{min-height:clamp(96px,15vh,150px)}
+}
+
+@media (max-width:700px){
+/* 05 — one column on a phone: headline, note, one plate row */
+
+/* 13 — four frames, three roster cards, real heights */
+
+.bcard{min-height:0}
+
+.rosterstrip{grid-template-columns:repeat(3,minmax(0,1fr));min-height:clamp(110px,17vh,170px)}
+}
+
+@media (max-width:700px){
+/* an older rule hid the middle plate of each column — put it back */
+
+/* broadcast: two rows of frames that actually have room, three cards */
+
+.rosterstrip{min-height:clamp(120px,19vh,190px)}
+}
+
+@media (max-width:700px){
+/* the early phone pass hid too much; these are the final counts */
+.bcard{display:grid !important}
+
+.rcard{display:grid}
+
+/* the last plate in a column absorbs the slack so a column ends flush */
+}
+
+@media (max-width:700px){
+/* count from the end so the hidden lead/poster don't shift the maths */
+.rcard{display:grid}
+
+/* a wide lockup must not be stretched tall to fill a column */
+}
+
+@media (max-width:700px){
+.rosterstrip .rcard{display:grid !important}
+}
+
+/* ---------- ambient sound switch ---------- */
+#hud .hudright{display:flex;align-items:center;gap:clamp(10px,1.8vw,22px)}
+.sndbtn{
+  appearance:none;background:none;border:0;padding:0;margin:0;cursor:pointer;
+  pointer-events:auto;display:inline-flex;align-items:center;gap:7px;
+  font-family:var(--f-mono);font-size:10px;letter-spacing:.24em;text-transform:uppercase;
+  color:currentColor;opacity:.62;transition:opacity .3s ease;
+}
+.sndbtn:hover,
+.sndbtn:focus-visible{opacity:1}
+.sndicon{display:inline-flex;align-items:flex-end;gap:2px;height:11px}
+.sndicon b{width:2px;height:3px;background:currentColor;display:block;border-radius:1px;transition:height .25s ease}
+.sndbtn[aria-pressed="true"] .sndicon b{animation:eq 1.1s ease-in-out infinite}
+.sndbtn[aria-pressed="true"] .sndicon b:nth-child(2){animation-delay:.15s}
+.sndbtn[aria-pressed="true"] .sndicon b:nth-child(3){animation-delay:.3s}
+.sndbtn[aria-pressed="true"] .sndicon b:nth-child(4){animation-delay:.45s}
+@keyframes eq{
+0%,
+100%{height:3px}
+50%{height:11px}
+}
+#hud{pointer-events:none}
+@media (max-width:720px){
+.sndbtn span{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+.sndbtn[aria-pressed="true"] .sndicon b{animation:none;height:7px}
+}
+
+/* the hero keeps a pulse when nothing is happening */
+.hero-glow{will-change:transform}
+.hero-top,
+.hero-bot{will-change:transform}
+@media (prefers-reduced-motion:reduce){
+.hero-glow,
+.hero-top,
+.hero-bot{transform:none !important}
+}
+/* ---------- bento: tray wrapper and responsive thinning ---------- */
+.btrayw{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
+.btray{max-width:100%;max-height:100%}
+
+@media (max-width:560px){
+.bcell.note .s{display:none}
+.blab{font-size:7px;letter-spacing:.1em;padding:5px 6px 4px}
+.btray{padding:7px}
+}
+.bcell.terse .s{display:none}
+.bcell.terse .t{font-size:clamp(.7rem,.92vw,.9rem)}
+.bcell.terse.chop,
+.bcell.terse.note{padding:clamp(8px,.9vw,14px);gap:4px}
+.bcell.terse.chop .t,
+.bcell.terse.note .t{font-size:clamp(.66rem,.85vw,.82rem);line-height:1.2}
+
+/* ---------- brutalist: one column on tablet, thinner wall on phones ---------- */
+.brut{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:0;
+  border:3px solid #000;background:#f5f4f0;
+  height:min(100%,calc(100vh - clamp(150px,20vh,220px)))}
+.bcol{display:flex;flex-direction:column;min-height:0;min-width:0;border-right:3px solid #000}
+.bcol:last-child{border-right:0}
+.brut .bpanel{flex:none}
+/* whatever sits directly above the wall absorbs the column's slack:
+   the headline panel on the left, the black deliverables note on the right */
+.bcol > :nth-last-child(2){flex:1 1 auto;min-height:0}
+
+@media (max-width:1000px){
+.bgridx{grid-template-columns:repeat(2,minmax(0,1fr))}
+/* stacked, but still height-bound so the wall can be fitted rather than clipped */
+.brut{grid-template-columns:1fr;grid-template-rows:minmax(0,1.06fr) minmax(0,1fr)}
+.bcol{border-right:0;border-bottom:3px solid #000}
+.bcol:last-child{border-bottom:0}
+}
+@media (max-width:700px){
+.bgridx{grid-template-columns:1fr 1fr;gap:8px;min-height:clamp(210px,33vh,320px)}
+.brut{height:min(100%,calc(100vh - clamp(120px,17vh,180px)));
+      grid-template-rows:minmax(0,1fr) minmax(0,1.05fr)}
+
+.brut .bpanel{padding:11px}
+.brut h2{font-size:clamp(1.8rem,12vw,2.6rem)}
+.brut p{font-size:.72rem;line-height:1.5}
+.btable{font-size:.6rem}
+.brut .bnote{font-size:.62rem;line-height:1.45}
+.binkfill span{display:none}
+}
+
+/* ============================================================
+   PHONE — the chapters stop being pinned slides and become a
+   document. Nothing is hidden: a chapter is as tall as the work
+   it holds, and the reveals fire off each element's own position.
+   ============================================================ */
+@media (max-width:1000px){
+  .stage{height:auto !important;min-height:0;content-visibility:visible}
+  .pin{position:relative;height:auto;min-height:100svh;overflow:hidden;
+       padding-block:clamp(52px,9vh,80px)}
+  .depth{position:relative;inset:auto;transform:none !important;
+         opacity:1 !important;filter:none !important;transform-style:flat}
+  .frame{position:relative;inset:auto;padding:clamp(16px,4.6vw,26px);
+         padding-block:0;align-items:flex-start}
+  .wrap{height:auto !important;min-width:0;max-width:100%}
+  .frame > *,
+  .swiss,.swiss > *,.swiss .strip .ph,
+  .press,.press > *,.cmyk,.cmyk > *,
+  .neu,.neu > *,.contact,.contact > *{min-width:0}
+  .veil{display:none}
+  #vignette{display:none}
+
+  /* every chapter's own height rules have to let go */
+  .brut{height:auto;grid-template-rows:auto auto}
+  .bento{height:auto;gap:clamp(12px,3vh,20px)}
+  .btrayw{min-height:clamp(420px,72vh,760px)}
+  .bgridx{min-height:0;grid-template-rows:auto}
+  .hang{grid-template-rows:auto}
+  .study{grid-template-rows:auto}
+  .motion{grid-template-rows:auto}
+  .reels{grid-template-columns:1fr;gap:clamp(12px,3vh,20px)}
+  .gate{min-height:0;height:auto;aspect-ratio:16/9}
+  .gate.square{aspect-ratio:1}
+  .brun{min-height:clamp(260px,44vh,440px)}
+  .seps{max-height:none}
+  .trail{min-height:clamp(300px,52vh,520px)}
+}
+
+/* ---------- phone: chapters that were built around a pointer ---------- */
+@media (max-width:1000px){
+  /* 00 — the tunnel becomes a moving strip of the work, all ten of it */
+  #s-hero .pin{display:flex;flex-direction:column;justify-content:center;gap:clamp(16px,4vh,30px)}
+  #s-hero .depth{order:1}
+  #s-hero .tunnel{order:2}
+  .tunnel{position:relative;inset:auto;z-index:1;overflow:hidden;flex:none;
+          height:clamp(116px,21vh,180px);
+          mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent);
+          -webkit-mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent)}
+  .tunnel{display:flex;gap:9px;overflow-x:auto;scrollbar-width:none}
+  .tunnel::-webkit-scrollbar{display:none}
+  .tunnel.marq{width:max-content;overflow:visible;animation:tstrip 52s linear infinite}
+  .tcard{position:relative;left:auto;top:auto;margin:0;flex:none;
+         transform:none !important;opacity:1 !important;
+         height:100%;width:auto;aspect-ratio:var(--ar,3/4)}
+  .tcard.wide{width:auto}
+  @keyframes tstrip{to{transform:translate3d(-50%,0,0)}}
+  .hero-wrap{display:block}
+  .hero-mark{margin:clamp(12px,2.6vh,22px) 0 0}
+  .hero-bot{margin-top:clamp(14px,2.6vh,24px)}
+
+  /* 08 — no cursor on a phone, so the archive prints itself as a spread */
+  #s-riso .pin{display:flex;flex-direction:column}
+  #s-riso .depth{order:1}
+  #s-riso .trail{order:2}
+  .trail{position:relative;inset:auto;overflow:visible;
+         display:grid;grid-template-columns:1fr 1fr;
+         gap:clamp(8px,2.4vw,14px);align-content:start;
+         margin-top:clamp(14px,3vh,24px)}
+  .tplate{position:relative;left:auto;top:auto;width:auto;
+          opacity:1;transform:none;mix-blend-mode:multiply;
+          aspect-ratio:var(--ar,4/5)}
+  .tplate:nth-child(odd){margin-top:clamp(10px,3vw,22px)}
+  .riso{grid-template-rows:auto}
+
+  /* 12 — every chip on the wall, no display frame to hold one at a time */
+  .hang{grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+        gap:clamp(7px,2vw,12px) !important}
+  .boardwrap{grid-template-columns:1fr}
+
+  /* 14 — three reels, stacked, each one playable */
+  .reel{min-height:0}
+  .bgeo .tick{display:none}
+  .bgeo .grid{stroke-dasharray:2 7;opacity:.34}
+}
+
+/* ---------- phone: cards sized for a pinned row have to let go ---------- */
+@media (max-width:1000px){
+  .bcard,
+  .rcard{grid-template-rows:auto auto;min-height:0;width:auto;margin-inline:0}
+  .bcard .gate16{height:auto;width:100%;aspect-ratio:16/9}
+  .rcard .ph{height:auto;width:100%;aspect-ratio:var(--ar,9/16);margin-inline:0}
+  .rcard .pimg{object-fit:cover}
+  .rosterstrip{grid-template-columns:repeat(3,minmax(0,1fr));
+               max-height:none;min-height:0;align-items:start;
+               gap:clamp(8px,2.4vw,14px)}
+  .rposter{display:block;grid-column:span 2}
+  .rposter .ph{aspect-ratio:var(--ar,1);width:100%}
+  .rlead{grid-column:1/-1;min-height:0;overflow:visible;align-content:start}
+  .bgridx{grid-template-columns:1fr 1fr;grid-auto-rows:auto}
+  .bcard figcaption,
+  .rcard figcaption{flex-direction:column;align-items:flex-start;gap:1px}
+}
